@@ -100,7 +100,7 @@ class ElectricalService(models.Model):
 
     def predict_cost(self):
         # Path to the model file
-        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'electrical_cost_model.pkl')
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'electrical_cost_esti_model.pkl')
         model = joblib.load(model_path)
 
         # Prepare the input data
