@@ -87,7 +87,7 @@ class ElectricalService(models.Model):
     # more infos
     cableLength = models.FloatField(editable=False,null=True)
     marqueur = models.BooleanField(default=False)
-    cost = models.FloatField(editable=False)
+    cost = models.FloatField()
 
     def save(self, *args, **kwargs):
         self.cableLength = self.calculate_cable_length()
