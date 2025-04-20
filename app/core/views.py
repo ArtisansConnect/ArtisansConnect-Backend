@@ -1,3 +1,8 @@
-from django.shortcuts import render
+# views.py
+from rest_framework import viewsets
+from .models import ElectricalService
+from .serializers import ElectricalServiceSerializer
 
-# Create your views here.
+class ElectricalServiceViewSet(viewsets.ModelViewSet):
+    queryset = ElectricalService.objects.all()
+    serializer_class = ElectricalServiceSerializer
