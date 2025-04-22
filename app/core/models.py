@@ -161,20 +161,19 @@ class PaintingService(models.Model):
         model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'painting_cost_model.pkl')
         model = joblib.load(model_path)
 
-        # Label encode the paintingType field
-        encoder = LabelEncoder()
-        encoder.classes_ = np.array(['BASIC', 'COLORED', 'DECORATIVE'])  # ensure it's a NumPy array
-
-        painting_type_encoded = encoder.transform(np.array([self.paintingType]))[0]
+        # One-hot encode paintingType
+        painting_type = self.paintingType
+        painting_type_COLORED = 1 if painting_type == 'COLORED' else 0
+        painting_type_DECORATIVE = 1 if painting_type == 'DECORATIVE' else 0
 
         input_data = [[
             self.wallSurface,
-            painting_type_encoded,
             self.coats,
             int(self.IswallScrapping),
             int(self.IsPlastering),
+            painting_type_COLORED,
+            painting_type_DECORATIVE
         ]]
 
         self.cost = model.predict(input_data)[0]
-
         super().save(*args, **kwargs)
