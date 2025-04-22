@@ -6,6 +6,8 @@ import os
 import joblib
 import pandas as pd
 from django.conf import settings
+from sklearn.preprocessing import LabelEncoder
+import numpy as np
 
 from .managers import CustomUserManager
 
@@ -136,3 +138,43 @@ class ElectricalService(models.Model):
     def _encode_panel(self, value):
         encoding = {'SMALL': 0, 'MEDUIM': 1, 'BIG': 2}
         return encoding.get(value.upper(), 1)
+    
+
+class PaintingService(models.Model):
+    PAINTING_TYPE = [
+        ('BASIC','Basic'),
+        ('COLORED','Colored'),
+        ('DECORATIVE','Decorative')
+    ]
+    wallSurface = models.FloatField()    
+    paintingType = models.CharField(
+        max_length = 100,
+        choices = PAINTING_TYPE,
+        default = 'BASIC'
+    )
+    coats = models.IntegerField()
+    IswallScrapping = models.BooleanField()
+    IsPlastering = models.BooleanField()
+    cost = models.FloatField()
+
+    def save(self, *args, **kwargs):
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'painting_cost_model.pkl')
+        model = joblib.load(model_path)
+
+        # Label encode the paintingType field
+        encoder = LabelEncoder()
+        encoder.classes_ = np.array(['BASIC', 'COLORED', 'DECORATIVE'])  # ensure it's a NumPy array
+
+        painting_type_encoded = encoder.transform(np.array([self.paintingType]))[0]
+
+        input_data = [[
+            self.wallSurface,
+            painting_type_encoded,
+            self.coats,
+            int(self.IswallScrapping),
+            int(self.IsPlastering),
+        ]]
+
+        self.cost = model.predict(input_data)[0]
+
+        super().save(*args, **kwargs)
