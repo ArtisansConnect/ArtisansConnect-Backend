@@ -37,6 +37,7 @@ QUALITY_CHOICES = [
 
 
 class ElectricalService(models.Model):
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)  
 
     PANEL_CHOICES = [
         ('BIG','Big'),
@@ -141,6 +142,7 @@ class ElectricalService(models.Model):
     
 
 class PaintingService(models.Model):
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)  
     PAINTING_TYPE = [
         ('BASIC','Basic'),
         ('COLORED','Colored'),
@@ -180,6 +182,7 @@ class PaintingService(models.Model):
 
 
 class FlooringService(models.Model):
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)  
     FLOORTYPE = [
         ('CARRELAGE','Carrelage'),
         ('PARQUETBOIS','ParquetBois'),
@@ -241,3 +244,31 @@ class HvacService(models.Model):
         self.cost = round(predicted_cost, 2)
 
         super().save(*args, **kwargs)
+
+# class PlumbingService(models.Model):
+#     SIZE_CATEGORIE = [
+#         ('small','Small'),
+#         ('medium','Medium'),
+#         ('big','Big')
+#     ]
+#     RADIATOR_TYPE = [
+#         ('COPA_Aluminium'),('COPA Aluminium'),
+#         ('GLOBAL_ISEO_350'),('GLOBAL ISEO 350'),
+#         ('FONDITAL_ARDENTE_C2'),('FONDITAL ARDENTE C2'),
+#         ('Samochauf_SAHD'),('Samochauf SAHD'),
+#         ('Sira_Alice_Royal'),('Sira Alice Royal'),
+#         ('Helyos_Evo'),('Helyos Evo'),
+#         ('Primavera_H500'),('Primavera H500')
+#     ]
+#     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)        
+#     boilerSize = models.CharField(
+#         max_length=100,
+#         choices=SIZE_CATEGORIE,
+#         default='medium'
+#     )
+#     radiatorType = models.CharField(
+#         max_length=100,
+#         choices=RADIATOR_TYPE,
+#         default= 'COPA_Aluminium'
+#     )
+#     radiator = models.IntegerField()
