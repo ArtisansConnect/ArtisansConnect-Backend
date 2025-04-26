@@ -6,20 +6,20 @@ class ElectricalServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ElectricalService
         fields = '__all__'
-        read_only_fields = ['cost', 'cableLength']
+        read_only_fields = ['user','cost', 'cableLength']
 
 
 class PaintingServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaintingService
         fields = '__all__'
-        read_only_fields = ['cost']  
+        read_only_fields = ['user','cost']  
 
 class FlooringServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = FlooringService
         fields = '__all__'
-        read_only_fields = ['cost']   
+        read_only_fields = ['user','cost']   
 
 class HvacServiceSerializer(serializers.ModelSerializer):
     class Meta:
