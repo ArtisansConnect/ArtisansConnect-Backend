@@ -24,5 +24,5 @@ class FlooringServiceSerializer(serializers.ModelSerializer):
 class HvacServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = HvacService
-        fields = ['id', 'user', 'smallHvac', 'mediumHvac', 'bigHvac', 'cost']
-        read_only_fields = ['cost']  
+        fields = ['id','user', 'smallHvac', 'mediumHvac', 'bigHvac', 'cost']
+        read_only_fields = ['user','cost']  
