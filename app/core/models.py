@@ -245,30 +245,120 @@ class HvacService(models.Model):
 
         super().save(*args, **kwargs)
 
-# class PlumbingService(models.Model):
-#     SIZE_CATEGORIE = [
-#         ('small','Small'),
-#         ('medium','Medium'),
-#         ('big','Big')
-#     ]
-#     RADIATOR_TYPE = [
-#         ('COPA_Aluminium'),('COPA Aluminium'),
-#         ('GLOBAL_ISEO_350'),('GLOBAL ISEO 350'),
-#         ('FONDITAL_ARDENTE_C2'),('FONDITAL ARDENTE C2'),
-#         ('Samochauf_SAHD'),('Samochauf SAHD'),
-#         ('Sira_Alice_Royal'),('Sira Alice Royal'),
-#         ('Helyos_Evo'),('Helyos Evo'),
-#         ('Primavera_H500'),('Primavera H500')
-#     ]
-#     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)        
-#     boilerSize = models.CharField(
-#         max_length=100,
-#         choices=SIZE_CATEGORIE,
-#         default='medium'
-#     )
-#     radiatorType = models.CharField(
-#         max_length=100,
-#         choices=RADIATOR_TYPE,
-#         default= 'COPA_Aluminium'
-#     )
-#     radiator = models.IntegerField()
+class PlumbingService(models.Model):
+    SIZE_CATEGORIE = [
+        ('small','Small'),
+        ('medium','Medium'),
+        ('big','Big')
+    ]
+    RADIATOR_TYPE = [
+        ('COPA_Aluminium'),('COPA Aluminium'),
+        ('GLOBAL_ISEO_350'),('GLOBAL ISEO 350'),
+        ('FONDITAL_ARDENTE_C2'),('FONDITAL ARDENTE C2'),
+        ('Samochauf_SAHD'),('Samochauf SAHD'),
+        ('Sira_Alice_Royal'),('Sira Alice Royal'),
+        ('Helyos_Evo'),('Helyos Evo'),
+        ('Primavera_H500'),('Primavera H500')
+    ]
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE) 
+
+    # Central elements       
+    boilerSize = models.CharField(
+        max_length=100,
+        choices=SIZE_CATEGORIE,
+        default='medium'
+    )
+    radiatorType = models.CharField(
+        max_length=100,
+        choices=RADIATOR_TYPE,
+        default= 'COPA_Aluminium'
+    )
+    radiator = models.IntegerField()
+
+    # Sanitary elements inputs
+    TOILET_CATEGORIES = [
+        ('Basic-Ceramic','Basic Ceramic'),
+        ('One-Piece','One-Piece'),
+        ('Wall-Hung','Wall-Hung')
+    ]     
+    
+    toilet = models.IntegerField()
+    toileType = models.CharField(
+        max_length=100,
+        choices=TOILET_CATEGORIES,
+        default='One-Piece'
+    )
+
+    WASHBASIN_CATEGORIES = [
+        ('Pedestal','Pedestal'),
+        ('Wall-Mounted','Wall-Mounted'),
+        ('Countertop','Countertop')
+    ]
+    washbasin = models.IntegerField()
+    washbasinType = models.CharField(
+        max_length=100,
+        choices=WASHBASIN_CATEGORIES,
+        default='Pedestal'
+    )
+
+    Bathtub_CATEGORIES = [
+        ('Standard','Standard'),
+        ('Luxury','Luxury')
+    ]
+    bathhub = models.IntegerField()
+    bathhubType = models.CharField(
+        max_length=100,
+        choices=Bathtub_CATEGORIES,
+        default='Standard'
+    )
+    showerCabin = models.IntegerField()
+    showerCabinType = models.CharField(
+        max_length=100,
+        choices=Bathtub_CATEGORIES,
+        default='Standard'
+    )
+
+    BIDET_CATEGORIES = [
+        ('Floor-Mounted','Floor-Mounted'),
+        ('Wall-Hung','Wall-Hung')
+    ]
+    Bidet = models.IntegerField()
+    BidetType = models.CharField(
+        max_length=100,
+        choices=BIDET_CATEGORIES,
+        default='Floor-Mounted'
+    )
+
+    WaterHeater_CATEGORIES = [
+        ('Electric','Electric'),
+        ('GAS','GAS')
+    ]
+    waterHeater = models.IntegerField()
+    waterHeaterType = models.CharField(
+        max_length=100,
+        choices=WaterHeater_CATEGORIES,
+        default='Electric'
+    )
+
+    # Kitchen Elements
+    QualityChoices = [
+        ('poor','poor'),
+        ('high','high')
+    ]
+    CategorieSink_Choices = [
+        ('single','single'),
+        ('double','double')
+    ]
+    sinkTypeQuality = models.CharField(
+        max_length=100,
+        choices=QUALITY_CHOICES,
+        default='poor'
+    )
+    sinkCategorie = models.CharField(
+        max_length=100,
+        choices=QUALITY_CHOICES,
+        default='single'
+    )
+
+    cost = models.FloatField()
+    time = models.FloatField()
