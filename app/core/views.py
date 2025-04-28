@@ -3,11 +3,13 @@ from rest_framework import viewsets,permissions
 from .models import (ElectricalService,
                      PaintingService,
                      FlooringService,
-                     HvacService)
+                     HvacService,
+                     PlumbingService)
 from .serializers import (ElectricalServiceSerializer,
                           PaintingServiceSerializer,
                           FlooringServiceSerializer,
-                          HvacServiceSerializer)
+                          HvacServiceSerializer,
+                          PlumbingServiceSerializer)
 
 class ElectricalServiceViewSet(viewsets.ModelViewSet):
     queryset = ElectricalService.objects.all()
@@ -39,4 +41,12 @@ class HvacServiceViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)    
+        serializer.save(user=self.request.user)  
+
+class PlumbingServiceViewSet(viewsets.ModelViewSet):
+    queryset = PlumbingService.objects.all()
+    serializer_class = PlumbingServiceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)           

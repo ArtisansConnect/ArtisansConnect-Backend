@@ -247,18 +247,18 @@ class HvacService(models.Model):
 
 class PlumbingService(models.Model):
     SIZE_CATEGORIE = [
-        ('small','Small'),
-        ('medium','Medium'),
-        ('big','Big')
+        ('small', 'Small'),
+        ('medium', 'Medium'),
+        ('big', 'Big')
     ]
     RADIATOR_TYPE = [
-        ('COPA_Aluminium'),('COPA Aluminium'),
-        ('GLOBAL_ISEO_350'),('GLOBAL ISEO 350'),
-        ('FONDITAL_ARDENTE_C2'),('FONDITAL ARDENTE C2'),
-        ('Samochauf_SAHD'),('Samochauf SAHD'),
-        ('Sira_Alice_Royal'),('Sira Alice Royal'),
-        ('Helyos_Evo'),('Helyos Evo'),
-        ('Primavera_H500'),('Primavera H500')
+        ('COPA_Aluminium', 'COPA Aluminium'),
+        ('GLOBAL_ISEO_350', 'GLOBAL ISEO 350'),
+        ('FONDITAL_ARDENTE_C2', 'FONDITAL ARDENTE C2'),
+        ('Samochauf_SAHD', 'Samochauf SAHD'),
+        ('Sira_Alice_Royal', 'Sira Alice Royal'),
+        ('Helyos_Evo', 'Helyos Evo'),
+        ('Primavera_H500', 'Primavera H500')
     ]
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE) 
 
@@ -270,7 +270,7 @@ class PlumbingService(models.Model):
     )
     radiatorType = models.CharField(
         max_length=100,
-        choices=RADIATOR_TYPE,
+        choices= RADIATOR_TYPE,
         default= 'COPA_Aluminium'
     )
     radiator = models.IntegerField()
@@ -288,7 +288,8 @@ class PlumbingService(models.Model):
         choices=TOILET_CATEGORIES,
         default='One-Piece'
     )
-
+    
+    # lavabo
     WASHBASIN_CATEGORIES = [
         ('Pedestal','Pedestal'),
         ('Wall-Mounted','Wall-Mounted'),
@@ -300,7 +301,8 @@ class PlumbingService(models.Model):
         choices=WASHBASIN_CATEGORIES,
         default='Pedestal'
     )
-
+    
+    # baignoire
     Bathtub_CATEGORIES = [
         ('Standard','Standard'),
         ('Luxury','Luxury')
@@ -311,33 +313,45 @@ class PlumbingService(models.Model):
         choices=Bathtub_CATEGORIES,
         default='Standard'
     )
+
+    SHOWER_CABIN_CATEGORIES = [
+    ('Basic_Enclosure', 'Basic Enclosure'),
+    ('Luxury_Enclosure', 'Luxury Enclosure')
+    ]
+
+    # cabine de douche
     showerCabin = models.IntegerField()
     showerCabinType = models.CharField(
-        max_length=100,
-        choices=Bathtub_CATEGORIES,
-        default='Standard'
+    max_length=100,
+    choices=SHOWER_CABIN_CATEGORIES,
+    default='Basic_Enclosure'
     )
-
+    
+    #Bidet lavabo
     BIDET_CATEGORIES = [
-        ('Floor-Mounted','Floor-Mounted'),
+        ('Bidet-Ceramic','Bidet-Ceramic'),
+        ('Bidet-Mixer-Tap','Bidet-Mixer-Tap'),
         ('Wall-Hung','Wall-Hung')
     ]
     Bidet = models.IntegerField()
     BidetType = models.CharField(
         max_length=100,
         choices=BIDET_CATEGORIES,
-        default='Floor-Mounted'
+        default='Bidet-Ceramic'
     )
-
+    
+    # chauffe-eau
     WaterHeater_CATEGORIES = [
-        ('Electric','Electric'),
-        ('GAS','GAS')
+        ('Electric-30liters','Electric-30liters'),
+        ('Electric-50liters','Electric-50liters'),
+        ('GAS-6liters','GAS-6liters'),
+        ('GAS-11liters','GAS-11liters')
     ]
     waterHeater = models.IntegerField()
     waterHeaterType = models.CharField(
         max_length=100,
         choices=WaterHeater_CATEGORIES,
-        default='Electric'
+        default='GAS-6liters'
     )
 
     # Kitchen Elements
@@ -356,9 +370,66 @@ class PlumbingService(models.Model):
     )
     sinkCategorie = models.CharField(
         max_length=100,
-        choices=QUALITY_CHOICES,
+        choices=CategorieSink_Choices,
         default='single'
     )
 
     cost = models.FloatField()
     time = models.FloatField()
+
+    def load_model(self):
+        """Load the trained RandomForest model using joblib"""
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'plumbing_service_model.pkl')
+        return joblib.load(model_path)  # Loading the .pkl model
+
+    def save(self, *args, **kwargs):
+        """Override the save method to predict cost and time"""
+        # Extract the features from the model fields
+        features = {
+        'boilerSize': self.boilerSize,
+        'radiatorType': self.radiatorType,
+        'radiator': self.radiator,
+        'toilet': self.toilet,
+        'toileType': self.toileType,
+        'washbasin': self.washbasin,
+        'washbasinType': self.washbasinType,
+        'bathhub': self.bathhub,
+        'bathhubType': self.bathhubType,
+        'showerCabin': self.showerCabin,
+        'showerCabinType': self.showerCabinType,
+        'Bidet': self.Bidet,
+        'BidetType': self.BidetType,
+        'waterHeater': self.waterHeater,
+        'waterHeaterType': self.waterHeaterType,
+        'sinkTypeQuality': self.sinkTypeQuality,
+        'sinkCategorie': self.sinkCategorie
+    }
+
+        # Convert features to a DataFrame and one-hot encode
+        features_df = pd.DataFrame([features])
+        features_encoded = pd.get_dummies(features_df)
+
+        # Load the model
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'plumbing_service_model.pkl')
+        model = joblib.load(model_path)
+
+        # Load the training feature names
+        features_path = os.path.join(settings.BASE_DIR, 'ml_models', 'plumbing_service_features.pkl')
+        feature_names = joblib.load(features_path)
+
+        # Make sure features match the training features
+        for col in feature_names:
+            if col not in features_encoded.columns:
+                features_encoded[col] = 0  # add missing column with zeros
+
+        features_encoded = features_encoded[feature_names]  # ensure correct column order
+
+        # Predict
+        prediction = model.predict(features_encoded)
+
+        # Set the predicted cost and time
+        self.cost = prediction[0][0]
+        self.time = prediction[0][1]
+
+        # Call the original save method
+        super().save(*args, **kwargs)
