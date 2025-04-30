@@ -435,6 +435,25 @@ class PlumbingService(models.Model):
         # Call the original save method
         super().save(*args, **kwargs)
 
+# windows doors Service
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
+# Validation for Windows Doors Service
+
+def validate_window(value):
+    if not (0 <= value <= 30):
+        raise ValidationError(
+            _("%(value)s is not a value between 0 and 30"),
+            params={"value": value},
+        )
+    
+def validate_door(value):
+    if not (0 <= value <= 20):
+        raise ValidationError(
+            _("%(value)s is not a value between 0 and 20"),
+            params={"value": value},
+        )    
 
 class WindowsDoorsService(models.Model):
     TYPES_WINDOWS_CHOICES = [
@@ -449,13 +468,13 @@ class WindowsDoorsService(models.Model):
         ('HighEndWood','HighEndWood'),
     ]
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
-    windows = models.IntegerField()
+    windows = models.IntegerField(validators=[validate_window])
     windowsTypes = models.CharField(
         max_length=100,
         choices= TYPES_WINDOWS_CHOICES,
         default='PVC'
     )
-    doors = models.IntegerField()
+    doors = models.IntegerField(validators=[validate_door])
     doorsTypes = models.CharField(
         max_length=100,
         choices= TYPES_DOORS_CHOICES,
