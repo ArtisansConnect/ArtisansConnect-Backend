@@ -8,6 +8,7 @@ import pandas as pd
 from django.conf import settings
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
 
 from .managers import CustomUserManager
 
@@ -434,33 +435,97 @@ class PlumbingService(models.Model):
         # Call the original save method
         super().save(*args, **kwargs)
 
+# windows doors Service
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
+# Validation for Windows Doors Service
+
+def validate_window(value):
+    if not (0 <= value <= 30):
+        raise ValidationError(
+            _("%(value)s is not a value between 0 and 30"),
+            params={"value": value},
+        )
+    
+def validate_door(value):
+    if not (0 <= value <= 20):
+        raise ValidationError(
+            _("%(value)s is not a value between 0 and 20"),
+            params={"value": value},
+        )    
+
 class WindowsDoorsService(models.Model):
     TYPES_WINDOWS_CHOICES = [
         ('PVC','Pvc'),
-        ('SmallPVC','Smallpvc')
-        ('Aluminum','Aluminum')
-        ('Wood','wood')
+        ('Aluminum','Aluminum'),
+        ('Wood','wood'),
     ]
     TYPES_DOORS_CHOICES = [
         ('PVC','PVC'),
-        ('SmallPVC','SmallPVC')
-        ('Aluminum','Aluminum')
+        ('Aluminum','Aluminum'),
         ('StandardWood','StandardWood'),
         ('HighEndWood','HighEndWood'),
-        ('METAL','METAL')
     ]
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
-    windows = models.IntegerField()
+    windows = models.IntegerField(validators=[validate_window])
     windowsTypes = models.CharField(
         max_length=100,
         choices= TYPES_WINDOWS_CHOICES,
         default='PVC'
     )
-    doors = models.IntegerField()
+    doors = models.IntegerField(validators=[validate_door])
     doorsTypes = models.CharField(
         max_length=100,
         choices= TYPES_DOORS_CHOICES,
         default='pvc'
     )
-    time = models.IntegerField()
-    cost = models.FloatField()
+    time = models.FloatField(null=True, blank=True)
+    cost = models.FloatField(null=True, blank=True)
+
+    def load_model(self):
+        """Load the trained RandomForest model using joblib"""
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'windows_doors_estimator_model.pkl')
+        return joblib.load(model_path)  # Loading the .pkl model
+
+    def save(self, *args, **kwargs):
+        """Override the save method to predict cost and time"""
+        # Extract the features from the model fields
+        features = {
+            'windows': self.windows,
+            'windowsTypes_PVC': 1 if self.windowsTypes == 'PVC' else 0,
+            'windowsTypes_Aluminum': 1 if self.windowsTypes == 'Aluminum' else 0,
+            'windowsTypes_Wood': 1 if self.windowsTypes == 'Wood' else 0,
+            'doors': self.doors,
+            'doorsTypes_PVC': 1 if self.doorsTypes == 'PVC' else 0,
+            'doorsTypes_Aluminum': 1 if self.doorsTypes == 'Aluminum' else 0,
+            'doorsTypes_StandardWood': 1 if self.doorsTypes == 'StandardWood' else 0,
+            'doorsTypes_HighEndWood': 1 if self.doorsTypes == 'HighEndWood' else 0
+        }
+
+        # Convert features to a DataFrame and one-hot encode
+        features_df = pd.DataFrame([features])
+
+        # Load the model
+        model = self.load_model()
+
+        # Load the training feature names
+        features_path = os.path.join(settings.BASE_DIR, 'ml_models', 'model_features_windor.pkl')
+        feature_names = joblib.load(features_path)
+
+        # Make sure features match the training features
+        for col in feature_names:
+            if col not in features_df.columns:
+                features_df[col] = 0  # Add missing column with zeros
+
+        features_df = features_df[feature_names]  # Ensure correct column order
+
+        # Predict
+        prediction = model.predict(features_df)
+
+        # Set the predicted cost and time
+        self.cost = prediction[0][0]
+        self.time = prediction[0][1]
+
+        # Call the original save method
+        super().save(*args, **kwargs)
