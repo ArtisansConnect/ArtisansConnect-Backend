@@ -433,3 +433,34 @@ class PlumbingService(models.Model):
 
         # Call the original save method
         super().save(*args, **kwargs)
+
+class WindowsDoorsService(models.Model):
+    TYPES_WINDOWS_CHOICES = [
+        ('PVC','Pvc'),
+        ('SmallPVC','Smallpvc')
+        ('Aluminum','Aluminum')
+        ('Wood','wood')
+    ]
+    TYPES_DOORS_CHOICES = [
+        ('PVC','PVC'),
+        ('SmallPVC','SmallPVC')
+        ('Aluminum','Aluminum')
+        ('StandardWood','StandardWood'),
+        ('HighEndWood','HighEndWood'),
+        ('METAL','METAL')
+    ]
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    windows = models.IntegerField()
+    windowsTypes = models.CharField(
+        max_length=100,
+        choices= TYPES_WINDOWS_CHOICES,
+        default='PVC'
+    )
+    doors = models.IntegerField()
+    doorsTypes = models.CharField(
+        max_length=100,
+        choices= TYPES_DOORS_CHOICES,
+        default='pvc'
+    )
+    time = models.IntegerField()
+    cost = models.FloatField()
