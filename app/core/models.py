@@ -8,6 +8,7 @@ import pandas as pd
 from django.conf import settings
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
 
 from .managers import CustomUserManager
 
@@ -426,6 +427,82 @@ class PlumbingService(models.Model):
 
         # Predict
         prediction = model.predict(features_encoded)
+
+        # Set the predicted cost and time
+        self.cost = prediction[0][0]
+        self.time = prediction[0][1]
+
+        # Call the original save method
+        super().save(*args, **kwargs)
+
+
+class WindowsDoorsService(models.Model):
+    TYPES_WINDOWS_CHOICES = [
+        ('PVC','Pvc'),
+        ('Aluminum','Aluminum'),
+        ('Wood','wood'),
+    ]
+    TYPES_DOORS_CHOICES = [
+        ('PVC','PVC'),
+        ('Aluminum','Aluminum'),
+        ('StandardWood','StandardWood'),
+        ('HighEndWood','HighEndWood'),
+    ]
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    windows = models.IntegerField()
+    windowsTypes = models.CharField(
+        max_length=100,
+        choices= TYPES_WINDOWS_CHOICES,
+        default='PVC'
+    )
+    doors = models.IntegerField()
+    doorsTypes = models.CharField(
+        max_length=100,
+        choices= TYPES_DOORS_CHOICES,
+        default='pvc'
+    )
+    time = models.FloatField(null=True, blank=True)
+    cost = models.FloatField(null=True, blank=True)
+
+    def load_model(self):
+        """Load the trained RandomForest model using joblib"""
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'windows_doors_estimator_model.pkl')
+        return joblib.load(model_path)  # Loading the .pkl model
+
+    def save(self, *args, **kwargs):
+        """Override the save method to predict cost and time"""
+        # Extract the features from the model fields
+        features = {
+            'windows': self.windows,
+            'windowsTypes_PVC': 1 if self.windowsTypes == 'PVC' else 0,
+            'windowsTypes_Aluminum': 1 if self.windowsTypes == 'Aluminum' else 0,
+            'windowsTypes_Wood': 1 if self.windowsTypes == 'Wood' else 0,
+            'doors': self.doors,
+            'doorsTypes_PVC': 1 if self.doorsTypes == 'PVC' else 0,
+            'doorsTypes_Aluminum': 1 if self.doorsTypes == 'Aluminum' else 0,
+            'doorsTypes_StandardWood': 1 if self.doorsTypes == 'StandardWood' else 0,
+            'doorsTypes_HighEndWood': 1 if self.doorsTypes == 'HighEndWood' else 0
+        }
+
+        # Convert features to a DataFrame and one-hot encode
+        features_df = pd.DataFrame([features])
+
+        # Load the model
+        model = self.load_model()
+
+        # Load the training feature names
+        features_path = os.path.join(settings.BASE_DIR, 'ml_models', 'model_features_windor.pkl')
+        feature_names = joblib.load(features_path)
+
+        # Make sure features match the training features
+        for col in feature_names:
+            if col not in features_df.columns:
+                features_df[col] = 0  # Add missing column with zeros
+
+        features_df = features_df[feature_names]  # Ensure correct column order
+
+        # Predict
+        prediction = model.predict(features_df)
 
         # Set the predicted cost and time
         self.cost = prediction[0][0]
