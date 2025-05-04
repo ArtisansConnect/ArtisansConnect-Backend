@@ -529,3 +529,20 @@ class WindowsDoorsService(models.Model):
 
         # Call the original save method
         super().save(*args, **kwargs)
+
+class RoofingService(models.Model):
+    ROOF_TYPES = [
+        ('CanalTilesWithInsulation','Canal tiles with insulation'),
+        ('CanalTilesWithMortar','Canal tiles with mortar'),
+        ('RomanTiles','Roman tiles with waterproofing'),
+        ('SlateRoof','Slate roof')
+    ]
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    surface = models.FloatField()      
+    roofType = models.CharField(
+        max_length=100,
+        choices=ROOF_TYPES,
+        default='CanalTilesWithInsulation'
+    )   
+    time = models.FloatField(null=True, blank=True)
+    cost = models.FloatField(null=True, blank=True)
