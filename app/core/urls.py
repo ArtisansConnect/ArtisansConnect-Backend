@@ -1,5 +1,12 @@
 from rest_framework.routers import DefaultRouter
-from .views import ElectricalServiceViewSet,PaintingServiceViewSet,FlooringServiceViewSet,HvacServiceViewSet,PlumbingServiceViewSet,WindowsDoorsServiceViewSet,RoofingServiceViewSet
+from .views import (ElectricalServiceViewSet,
+                    PaintingServiceViewSet,
+                    FlooringServiceViewSet,
+                    HvacServiceViewSet,
+                    PlumbingServiceViewSet,
+                    WindowsDoorsServiceViewSet,
+                    RoofingServiceViewSet,
+                    ConstructionHouseServiceViewSet)
 
 router = DefaultRouter()
 router.register(r'electrical-services', ElectricalServiceViewSet, basename='electricalservice')
@@ -9,5 +16,6 @@ router.register(r'hvac-services',HvacServiceViewSet)
 router.register(r'plumbing-service',PlumbingServiceViewSet)
 router.register(r'windowsdoors-service',WindowsDoorsServiceViewSet)
 router.register(r'roofing-service',RoofingServiceViewSet)
+router.register(r'construction-house-service',ConstructionHouseServiceViewSet)
 
 urlpatterns = router.urls

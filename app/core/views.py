@@ -6,14 +6,16 @@ from .models import (ElectricalService,
                      HvacService,
                      PlumbingService,
                      WindowsDoorsService,
-                     RoofingService)
+                     RoofingService,
+                     ConstructionHouseService)
 from .serializers import (ElectricalServiceSerializer,
                           PaintingServiceSerializer,
                           FlooringServiceSerializer,
                           HvacServiceSerializer,
                           PlumbingServiceSerializer,
                           WindowsDoorsServiceSerializer,
-                          RoofingServiceSerializer)
+                          RoofingServiceSerializer,
+                          ConstructionHouseSerializer)
 
 class ElectricalServiceViewSet(viewsets.ModelViewSet):
     queryset = ElectricalService.objects.all()
@@ -70,4 +72,12 @@ class RoofingServiceViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)                               
+        serializer.save(user=self.request.user)        
+
+class ConstructionHouseServiceViewSet(viewsets.ModelViewSet):
+    queryset = ConstructionHouseService.objects.all()
+    serializer_class = ConstructionHouseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)                                     
