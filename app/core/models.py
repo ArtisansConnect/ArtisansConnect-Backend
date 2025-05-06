@@ -529,3 +529,51 @@ class WindowsDoorsService(models.Model):
 
         # Call the original save method
         super().save(*args, **kwargs)
+
+
+# Roofing Service
+
+def validate_roof_surface(value):
+    if not (10 <= value <= 200):
+        raise ValidationError(
+            _("%(value)s is not a value between 10 and 200 m2"),
+            params={"value": value},
+        )    
+    
+class RoofingService(models.Model):
+    ROOF_TYPES = [
+        ('CanalTilesWithInsulation','Canal tiles with insulation'),
+        ('CanalTilesWithMortar','Canal tiles with mortar'),
+        ('RomanTiles','Roman tiles with waterproofing'),
+        ('SlateRoof','Slate roof')
+    ]
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    surface = models.FloatField(validators=[validate_roof_surface])      
+    roofType = models.CharField(
+        max_length=100,
+        choices=ROOF_TYPES,
+        default='CanalTilesWithInsulation'
+    )   
+    time = models.FloatField(null=True, blank=True)
+    cost = models.FloatField(null=True, blank=True)
+
+    def load_model(self):
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'roofing_models.pkl')
+        model = joblib.load(model_path)
+        return model
+
+    def save(self,*args,**kwargs):
+        # prepare the features
+        input_data = pd.DataFrame([{
+            'surface':self.surface,
+            'roofType':self.roofType
+        }])
+        # load the trained model
+        model = self.load_model()
+        time_model = model['time_model']
+        cost_model = model['cost_model']
+        # predict time and cost
+        self.time = float(time_model.predict(input_data)[0])
+        self.cost = float(cost_model.predict(input_data)[0])
+        # save to DB
+        super().save(*args,**kwargs)

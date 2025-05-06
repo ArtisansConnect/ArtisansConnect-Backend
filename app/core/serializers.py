@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import ElectricalService,PaintingService,FlooringService,HvacService,PlumbingService,WindowsDoorsService
+from .models import ElectricalService,PaintingService,FlooringService,HvacService,PlumbingService,WindowsDoorsService,RoofingService
 
 class ElectricalServiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,3 +38,9 @@ class WindowsDoorsServiceSerializer(serializers.ModelSerializer):
         model = WindowsDoorsService
         fields = '__all__'
         read_only_fields = ['user','time','cost']                
+
+class RoofingServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoofingService
+        fields = '__all__'
+        read_only_fields = ['user','time','cost']           
