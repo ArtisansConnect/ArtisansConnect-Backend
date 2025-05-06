@@ -577,3 +577,67 @@ class RoofingService(models.Model):
         self.cost = float(cost_model.predict(input_data)[0])
         # save to DB
         super().save(*args,**kwargs)
+
+
+class ConstructionHouseService(models.Model):
+    HOUSE_TYPE = [
+        ('Studio','Studio'),
+        ('F2','F2'),
+        ('F3','F3'),
+        ('F4','F4'),
+        ('F5','F5'),
+        ('F6','F6'),
+    ]
+    GROUND_TYPE = [
+        ('GoodSoil','GoodSoil'),
+        ('MediumSoil','MediumSoil'),
+        ('BadSoil','BadSoil'),
+    ]
+    TERRAIN_TYPE = [
+        ('Flat','Flat'),
+        ('Uneven','Uneven'),
+        ('Challenging','Challenging'),
+    ]
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    surface = models.FloatField()
+    numberFloors = models.IntegerField()
+    houseType = models.CharField(
+        max_length=100,
+        choices=HOUSE_TYPE,
+        default='F2'
+    )
+    groundType = models.CharField(
+        max_length=100,
+        choices=GROUND_TYPE,
+        default='MediumSoil'
+    )
+    terrainType = models.CharField(
+        max_length=100,
+        choices=TERRAIN_TYPE,
+        default='MediumSoil'
+    )
+    cost = models.FloatField()
+    time = models.FloatField()
+
+    def save(self, *args, **kwargs):
+        # Load the AI model
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models' , 'constructionHouse_model.pkl')
+        model = joblib.load(model_path)
+
+        # Prepare the input for prediction
+        input_data = pd.DataFrame([{
+            'surface': self.surface,
+            'numberFloors': self.numberFloors,
+            'houseType': self.houseType,
+            'groundType': self.groundType,
+            'terrainType': self.terrainType
+        }])
+
+
+        # Predict cost and time
+        prediction = model.predict(input_data)[0]
+        self.cost = round(prediction[0], 2)
+        self.time = round(prediction[1], 2)
+
+        # Save normally
+        super().save(*args, **kwargs)
