@@ -22,6 +22,9 @@ class ElectricalServiceViewSet(viewsets.ModelViewSet):
     serializer_class = ElectricalServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return ElectricalService.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -29,6 +32,9 @@ class PaintingServiceViewSet(viewsets.ModelViewSet):
     queryset = PaintingService.objects.all()
     serializer_class = PaintingServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return PaintingService.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -38,6 +44,9 @@ class FlooringServiceViewSet(viewsets.ModelViewSet):
     serializer_class = FlooringServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return FlooringService.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -46,6 +55,9 @@ class HvacServiceViewSet(viewsets.ModelViewSet):
     serializer_class = HvacServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return HvacService.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)  
 
@@ -53,6 +65,9 @@ class PlumbingServiceViewSet(viewsets.ModelViewSet):
     queryset = PlumbingService.objects.all()
     serializer_class = PlumbingServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return PlumbingService.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)          
@@ -63,6 +78,9 @@ class WindowsDoorsServiceViewSet(viewsets.ModelViewSet):
     serializer_class = WindowsDoorsServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return WindowsDoorsService.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)  
 
@@ -71,6 +89,9 @@ class RoofingServiceViewSet(viewsets.ModelViewSet):
     serializer_class = RoofingServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return RoofingService.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)        
 
@@ -78,6 +99,9 @@ class ConstructionHouseServiceViewSet(viewsets.ModelViewSet):
     queryset = ConstructionHouseService.objects.all()
     serializer_class = ConstructionHouseSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return ConstructionHouseService.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)                                     
