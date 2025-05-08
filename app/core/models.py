@@ -641,3 +641,48 @@ class ConstructionHouseService(models.Model):
 
         # Save normally
         super().save(*args, **kwargs)
+
+
+class FacadeService(models.Model):
+    LAYER_TYPE = [
+        ('Enduit Monocouche', 'Enduit Monocouche'),
+        ('Acrylic Mortar Coating', 'Acrylic Mortar Coating'),
+        ('Lime Plaster', 'Lime Plaster'),
+        ('Ventilated Facade(Porcelain)', 'Ventilated Facade(Porcelain)'),
+        ('Ventilated Facade(Terracotta)', 'Ventilated Facade(Terracotta)'),
+    ]
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    surface = models.FloatField()
+    finishing_layer = models.CharField(
+        max_length=100,
+        choices=LAYER_TYPE,
+        default='Enduit Monocouche'
+    )
+    ITE = models.BooleanField(default=False)
+    Hydrofuge = models.BooleanField(default=False)
+    cost = models.FloatField(blank=True, null=True)
+    time = models.FloatField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'facade_model.pkl')
+            model = joblib.load(model_path)
+
+            features = pd.DataFrame([{
+                'surface': self.surface,
+                'finishing_layer': self.finishing_layer,
+                'ITE': int(self.ITE),  # convert boolean to int if necessary
+                'Hydrofuge': int(self.Hydrofuge)
+            }])
+
+            prediction = model.predict(features)[0]
+            self.cost = round(prediction[0], 0)
+            self.time = round(prediction[1], 2)
+        except Exception as e:
+            # Log or handle error gracefully
+            print(f"Model prediction failed: {e}")
+            self.cost = None
+            self.time = None
+
+        super().save(*args, **kwargs)
