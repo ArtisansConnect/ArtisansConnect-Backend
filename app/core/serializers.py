@@ -21,7 +21,7 @@ class PaintingServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaintingService
         fields = '__all__'
-        read_only_fields = ['user','cost']  
+        read_only_fields = ['user','cost','time']  
 
 class FlooringServiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,8 +32,8 @@ class FlooringServiceSerializer(serializers.ModelSerializer):
 class HvacServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = HvacService
-        fields = ['id','user', 'smallHvac', 'mediumHvac', 'bigHvac', 'cost']
-        read_only_fields = ['user','cost']  
+        fields = '__all__'
+        read_only_fields = ['user','cost','time']  
 
 class PlumbingServiceSerializer(serializers.ModelSerializer):
     class Meta:
