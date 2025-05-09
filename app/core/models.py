@@ -187,44 +187,38 @@ class PaintingService(models.Model):
 
 
 class FlooringService(models.Model):
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)  
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
     FLOORTYPE = [
-        ('CARRELAGE','Carrelage'),
-        ('PARQUETBOIS','ParquetBois'),
-        ('VINYLEPVC','VinylePVC'),
-        ('MOQUETTE','Moquette')
+        ('CARRELAGE', 'Carrelage'),
+        ('PARQUETBOIS', 'ParquetBois'),
+        ('VINYLEPVC', 'VinylePVC'),
+        ('MOQUETTE', 'Moquette')
     ]
-    surface = models.FloatField() 
-    floorType = models.CharField(
-        max_length=100,
-        choices=FLOORTYPE,
-        default='CARRELAGE'
-    )  
-    quality = models.CharField(
-        max_length=100,
-        choices=QUALITY_CHOICES,
-        default='POOR'
-    )     
+
+    surface = models.FloatField()
+    floorType = models.CharField(max_length=100, choices=FLOORTYPE, default='CARRELAGE')
+    quality = models.CharField(max_length=100, choices=QUALITY_CHOICES, default='POOR')
+    
     cost = models.FloatField(editable=False)
+    time = models.FloatField(editable=False,null=True,blank=True)  # in hours
 
     def save(self, *args, **kwargs):
-        # Load model and encoders
-        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'flooring', 'flooring_cost_model.pkl')
-        floor_encoder_path = os.path.join(settings.BASE_DIR, 'ml_models', 'flooring', 'floorType_encoder.pkl')
-        quality_encoder_path = os.path.join(settings.BASE_DIR, 'ml_models', 'flooring', 'quality_encoder.pkl')
-
+        # Load the trained model
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models' ,'flooring_cost_time_model.pkl')
         model = joblib.load(model_path)
-        le_floor = joblib.load(floor_encoder_path)
-        le_quality = joblib.load(quality_encoder_path)
 
-        # Encode inputs
-        floor_type_encoded = le_floor.transform([self.floorType])[0]
-        quality_encoded = le_quality.transform([self.quality])[0]
+        # Prepare input as DataFrame
+        input_data = pd.DataFrame([{
+            'surface': self.surface,
+            'floorType': self.floorType,
+            'quality': self.quality
+        }])
 
-        input_data = [[self.surface, floor_type_encoded, quality_encoded]]
-
-        # Predict cost
-        self.cost = model.predict(input_data)[0]
+        # Predict cost and time
+        prediction = model.predict(input_data)[0]
+        self.cost = round(prediction[0], 2)
+        self.time = round(prediction[1], 2)
 
         super().save(*args, **kwargs)
 
