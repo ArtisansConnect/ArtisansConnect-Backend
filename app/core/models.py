@@ -160,9 +160,10 @@ class PaintingService(models.Model):
     IswallScrapping = models.BooleanField()
     IsPlastering = models.BooleanField()
     cost = models.FloatField()
+    time = models.FloatField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'painting_cost_model.pkl')
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'painting_model.pkl')
         model = joblib.load(model_path)
 
         # One-hot encode paintingType
@@ -179,7 +180,9 @@ class PaintingService(models.Model):
             painting_type_DECORATIVE
         ]]
 
-        self.cost = model.predict(input_data)[0]
+        prediction = model.predict(input_data)[0]  # [cost, time]
+        self.cost = round(prediction[0], 0)
+        self.time = prediction[1]
         super().save(*args, **kwargs)
 
 
@@ -232,18 +235,20 @@ class HvacService(models.Model):
     mediumHvac = models.IntegerField()
     bigHvac = models.IntegerField()
     cost = models.FloatField(editable=False)
+    time = models.FloatField(editable=False,null=True,blank=True)
 
     def save(self, *args, **kwargs):
         # Load the model only when saving
-        model_path = os.path.join(settings.BASE_DIR, 'ml_models/hvac_cost_model.pkl')
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models/hvac_model.pkl')
         model = joblib.load(model_path)
 
         # Prepare input as [small, medium, big]
         input_data = [[self.smallHvac, self.mediumHvac, self.bigHvac]]
-        predicted_cost = model.predict(input_data)[0]
+        predicted = model.predict(input_data)[0]  # [cost, time]
 
-        # Set the predicted cost
-        self.cost = round(predicted_cost, 2)
+        # Assign predictions
+        self.cost = round(predicted[0], 0)
+        self.time = round(predicted[1], 0)
 
         super().save(*args, **kwargs)
 
