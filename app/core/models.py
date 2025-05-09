@@ -92,22 +92,22 @@ class ElectricalService(models.Model):
     cableLength = models.FloatField(editable=False,null=True)
     marqueur = models.BooleanField(default=False)
     cost = models.FloatField()
+    time = models.FloatField(null=True, editable=False)
 
     def save(self, *args, **kwargs):
         self.cableLength = self.calculate_cable_length()
         # Predict cost before saving
-        self.cost = self.predict_cost()
+        self.cost, self.time = self.predict_cost_and_time()
         super().save(*args, **kwargs)
 
     def calculate_cable_length(self):
-        return round((self.surface * 1.5) + (self.rooms * 10), 2)    
+        return round((self.rooms * 10), 2)    
 
-    def predict_cost(self):
-        # Path to the model file
-        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'electrical_cost_esti_model.pkl')
+    def predict_cost_and_time(self):
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'electrical_model.pkl')
         model = joblib.load(model_path)
 
-        # Prepare the input data
+        # Prepare the input
         data = {
             'rooms': self.rooms,
             'surface': self.surface,
@@ -130,8 +130,9 @@ class ElectricalService(models.Model):
         }
 
         df = pd.DataFrame([data])
-        predicted_cost = model.predict(df)[0]
-        return round(predicted_cost, 2)
+        predictions = model.predict(df)[0]  # returns [cost, time]
+        return round(predictions[0], 0), round(predictions[1], 0)
+
 
     def _encode_quality(self, value):
         encoding = {'POOR': 0, 'NORMAL': 1, 'HIGH': 2}
