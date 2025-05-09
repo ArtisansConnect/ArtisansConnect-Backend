@@ -160,9 +160,10 @@ class PaintingService(models.Model):
     IswallScrapping = models.BooleanField()
     IsPlastering = models.BooleanField()
     cost = models.FloatField()
+    time = models.FloatField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'painting_cost_model.pkl')
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'painting_model.pkl')
         model = joblib.load(model_path)
 
         # One-hot encode paintingType
@@ -179,7 +180,9 @@ class PaintingService(models.Model):
             painting_type_DECORATIVE
         ]]
 
-        self.cost = model.predict(input_data)[0]
+        prediction = model.predict(input_data)[0]  # [cost, time]
+        self.cost = round(prediction[0], 0)
+        self.time = prediction[1]
         super().save(*args, **kwargs)
 
 
