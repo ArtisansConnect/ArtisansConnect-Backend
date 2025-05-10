@@ -686,3 +686,23 @@ class FacadeService(models.Model):
             self.time = None
 
         super().save(*args, **kwargs)
+
+
+class Project(models.Model):
+    STATUS_TYPE = [
+        ('PENDING','PENDING'),
+        ('REJECTED','REJECTED'),
+        ('ACCEPTED','ACCEPTED')
+    ]
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    electrical = models.ForeignKey(ElectricalService,on_delete=models.CASCADE,blank=True,null=True)
+    painting = models.ForeignKey(PaintingService,on_delete=models.CASCADE,blank=True,null=True)
+    hvac = models.ForeignKey(HvacService,on_delete=models.CASCADE,blank=True,null=True)
+    flooring = models.ForeignKey(FlooringService,on_delete=models.CASCADE,blank=True,null=True)
+    plumbing = models.ForeignKey(PlumbingService,on_delete=models.CASCADE,blank=True,null=True)
+    carpentary = models.ForeignKey(WindowsDoorsService,on_delete=models.CASCADE,blank=True,null=True)
+    roofing = models.ForeignKey(RoofingService,on_delete=models.CASCADE,blank=True,null=True)
+    construction = models.ForeignKey(ConstructionHouseService,on_delete=models.CASCADE,blank=True,null=True)
+    facade = models.ForeignKey(FacadeService,on_delete=models.CASCADE,blank=True,null=True)
+    status = models.CharField(max_length=100,choices=STATUS_TYPE,default='PENDING')
+    start_date = models.DateField(null=True,blank=True)

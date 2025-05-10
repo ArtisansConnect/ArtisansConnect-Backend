@@ -8,7 +8,8 @@ from .models import (ElectricalService,
                      WindowsDoorsService,
                      RoofingService,
                      ConstructionHouseService,
-                     FacadeService)
+                     FacadeService,
+                     Project)
 
 class ElectricalServiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,3 +65,9 @@ class FacadeServiceSerializer(serializers.ModelSerializer):
         model = FacadeService
         fields = '__all__'
         read_only_fields = ['user','time','cost']                            
+
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = '__all__'
+        read_only_fields = ['user','start_date','status']          

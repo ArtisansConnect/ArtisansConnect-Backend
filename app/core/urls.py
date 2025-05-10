@@ -7,7 +7,8 @@ from .views import (ElectricalServiceViewSet,
                     WindowsDoorsServiceViewSet,
                     RoofingServiceViewSet,
                     ConstructionHouseServiceViewSet,
-                    FacadeServiceViewSet)
+                    FacadeServiceViewSet,
+                    ProjectViewSet)
 
 router = DefaultRouter()
 router.register(r'electrical-services', ElectricalServiceViewSet, basename='electricalservice')
@@ -19,5 +20,6 @@ router.register(r'windowsdoors-service',WindowsDoorsServiceViewSet)
 router.register(r'roofing-service',RoofingServiceViewSet)
 router.register(r'construction-house-service',ConstructionHouseServiceViewSet)
 router.register(r'facade-service',FacadeServiceViewSet)
+router.register(r'project',ProjectViewSet)
 
 urlpatterns = router.urls
