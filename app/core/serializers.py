@@ -119,6 +119,13 @@ class FacadeProjectSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = '__all__'
+        read_only_fields = ['user','start_date','status']          
+
+
+class ProjectListSerializer(serializers.ModelSerializer):
     electrical = ElectricalProjectSerializer(read_only=True)
     painting = PaintingProjectSerializer(read_only=True)
     hvac = HvacProjectSerializer(read_only=True)
@@ -132,4 +139,4 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = '__all__'
-        read_only_fields = ['user','start_date','status']          
+        read_only_fields = ['user','start_date','status']                  
