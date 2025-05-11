@@ -1,5 +1,7 @@
 # views.py
-from rest_framework import viewsets,permissions
+from rest_framework import viewsets,permissions,status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .models import (ElectricalService,
                      PaintingService,
                      FlooringService,
@@ -19,7 +21,8 @@ from .serializers import (ElectricalServiceSerializer,
                           RoofingServiceSerializer,
                           ConstructionHouseSerializer,
                           FacadeServiceSerializer,
-                          ProjectSerializer)
+                          ProjectSerializer,
+                          ProjectListSerializer)
 
 class ElectricalServiceViewSet(viewsets.ModelViewSet):
     queryset = ElectricalService.objects.all()
@@ -130,4 +133,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Project.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)                     
+        serializer.save(user=self.request.user) 
+
+
+class ProjectListView(APIView):
+    serializer_class = ProjectListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self,request):
+        instance = Project.objects.filter(user=request.user)
+        serializer = ProjectListSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
