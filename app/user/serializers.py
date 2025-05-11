@@ -4,8 +4,8 @@ from core.models import CustomUser
 class RegisterSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id','email','firstName','lastName','phoneNumber','password']
-        extra_kwargs = {'password':{'write_only':True}}
+        fields = ['id','email','firstName','lastName','role','phoneNumber','password']
+        extra_kwargs = {'password':{'write_only':True}, 'role':{'write_only':True}}
 
     def create(self, validated_data):
         password = validated_data.pop('password')

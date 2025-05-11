@@ -14,10 +14,21 @@ from .managers import CustomUserManager
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    ROLE_TYPE = [
+        ('Client','Client'),
+        ('Artisan','Artisan'),
+        ('Manager','Manager'),
+        ('Admin','Admin')
+    ]
     email = models.EmailField(_("email address"), unique=True)
     firstName = models.CharField(max_length=100)
     lastName = models.CharField(max_length=100)
-    phoneNumber = models.IntegerField()
+    phoneNumber = models.IntegerField(
+        max_length=100,
+        choices= ROLE_TYPE,
+        default= 'Client'
+    )
+    role = models.CharField()
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
