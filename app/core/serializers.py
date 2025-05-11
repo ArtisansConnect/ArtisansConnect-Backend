@@ -119,15 +119,15 @@ class FacadeProjectSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    electrical = ElectricalProjectSerializer(read_only=True)
-    painting = PaintingProjectSerializer(read_only=True)
-    hvac = HvacProjectSerializer(read_only=True)
-    flooring = FlooringProjectSerializer(read_only=True)
-    plumbing = PlumbingProjectSerializer(read_only=True)
-    carpentary = CarpentaryProjectSerializer(read_only=True)
-    roofing = RoofingProjectSerializer(read_only=True)
-    construction = ConstructionProjectSerializer(read_only=True)
-    facade = FacadeProjectSerializer(read_only=True)
+    # electrical = ElectricalProjectSerializer(read_only=True)
+    # painting = PaintingProjectSerializer(read_only=True)
+    # hvac = HvacProjectSerializer(read_only=True)
+    # flooring = FlooringProjectSerializer(read_only=True)
+    # plumbing = PlumbingProjectSerializer(read_only=True)
+    # carpentary = CarpentaryProjectSerializer(read_only=True)
+    # roofing = RoofingProjectSerializer(read_only=True)
+    # construction = ConstructionProjectSerializer(read_only=True)
+    # facade = FacadeProjectSerializer(read_only=True)
 
     class Meta:
         model = Project
