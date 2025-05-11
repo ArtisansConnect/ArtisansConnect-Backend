@@ -23,18 +23,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_("email address"), unique=True)
     firstName = models.CharField(max_length=100)
     lastName = models.CharField(max_length=100)
-    phoneNumber = models.IntegerField(
+    phoneNumber = models.IntegerField()
+    role = models.CharField(
         max_length=100,
         choices= ROLE_TYPE,
         default= 'Client'
     )
-    role = models.CharField()
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['firstName','lastName','phoneNumber']
+    REQUIRED_FIELDS = ['firstName','lastName','phoneNumber','role']
 
     objects = CustomUserManager()
 
