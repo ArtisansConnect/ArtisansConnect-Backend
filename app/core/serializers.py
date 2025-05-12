@@ -119,17 +119,56 @@ class FacadeProjectSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    # electrical = ElectricalProjectSerializer(read_only=True)
-    # painting = PaintingProjectSerializer(read_only=True)
-    # hvac = HvacProjectSerializer(read_only=True)
-    # flooring = FlooringProjectSerializer(read_only=True)
-    # plumbing = PlumbingProjectSerializer(read_only=True)
-    # carpentary = CarpentaryProjectSerializer(read_only=True)
-    # roofing = RoofingProjectSerializer(read_only=True)
-    # construction = ConstructionProjectSerializer(read_only=True)
-    # facade = FacadeProjectSerializer(read_only=True)
-
     class Meta:
         model = Project
         fields = '__all__'
         read_only_fields = ['user','start_date','status']          
+
+
+class ProjectListSerializer(serializers.ModelSerializer):
+    electrical = ElectricalProjectSerializer(read_only=True)
+    painting = PaintingProjectSerializer(read_only=True)
+    hvac = HvacProjectSerializer(read_only=True)
+    flooring = FlooringProjectSerializer(read_only=True)
+    plumbing = PlumbingProjectSerializer(read_only=True)
+    carpentary = CarpentaryProjectSerializer(read_only=True)
+    roofing = RoofingProjectSerializer(read_only=True)
+    construction = ConstructionProjectSerializer(read_only=True)
+    facade = FacadeProjectSerializer(read_only=True)
+    total_time = serializers.SerializerMethodField()
+    total_cost = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = '__all__'
+        read_only_fields = ['user','start_date','status']                   
+
+    def get_total_time(self,obj):
+        time_fields = [
+            getattr(obj.electrical, 'time',0), 
+            getattr(obj.painting, 'time', 0),
+            getattr(obj.hvac, 'time', 0),
+            getattr(obj.plumbing, 'time', 0),
+            getattr(obj.flooring, 'time', 0),
+            getattr(obj.carpentary, 'time', 0),
+            getattr(obj.roofing, 'time', 0),
+            getattr(obj.construction, 'time', 0),
+            getattr(obj.facade, 'time', 0),
+        ]
+        total = round(sum([t for t in time_fields if t is not None]),0)
+        return total
+    
+    def get_total_cost(self, obj):
+        cost_fields = [
+            getattr(obj.electrical, 'cost', 0),
+            getattr(obj.painting, 'cost', 0),
+            getattr(obj.hvac, 'cost', 0),
+            getattr(obj.plumbing, 'cost', 0),
+            getattr(obj.flooring, 'cost', 0),
+            getattr(obj.carpentary, 'cost', 0),
+            getattr(obj.roofing, 'cost', 0),
+            getattr(obj.construction, 'cost', 0),
+            getattr(obj.facade, 'cost', 0),
+        ]
+        total = round(sum([c for c in cost_fields if c is not None]),0)
+        return total
