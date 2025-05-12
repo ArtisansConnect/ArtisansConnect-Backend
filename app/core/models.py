@@ -36,8 +36,19 @@ QUALITY_CHOICES = [
         ('HIGH','High'),
     ]
 
+STATUS_CHOICES = [
+    ('Selected','Selected'),
+    ('NonSelected','NonSelected')
+]
+
 
 class ElectricalService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)  
 
     PANEL_CHOICES = [
@@ -144,6 +155,12 @@ class ElectricalService(models.Model):
     
 
 class PaintingService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)  
     PAINTING_TYPE = [
         ('BASIC','Basic'),
@@ -187,6 +204,12 @@ class PaintingService(models.Model):
 
 
 class FlooringService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     FLOORTYPE = [
@@ -224,6 +247,12 @@ class FlooringService(models.Model):
 
 
 class HvacService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)        
     smallHvac = models.IntegerField()
     mediumHvac = models.IntegerField()
@@ -247,6 +276,12 @@ class HvacService(models.Model):
         super().save(*args, **kwargs)
 
 class PlumbingService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     SIZE_CATEGORIE = [
         ('small', 'Small'),
         ('medium', 'Medium'),
@@ -456,6 +491,12 @@ def validate_door(value):
         )    
 
 class WindowsDoorsService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     TYPES_WINDOWS_CHOICES = [
         ('PVC','Pvc'),
         ('Aluminum','Aluminum'),
@@ -541,6 +582,12 @@ def validate_roof_surface(value):
         )    
     
 class RoofingService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     ROOF_TYPES = [
         ('CanalTilesWithInsulation','Canal tiles with insulation'),
         ('CanalTilesWithMortar','Canal tiles with mortar'),
@@ -580,6 +627,12 @@ class RoofingService(models.Model):
 
 
 class ConstructionHouseService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     HOUSE_TYPE = [
         ('Studio','Studio'),
         ('F2','F2'),
@@ -644,6 +697,12 @@ class ConstructionHouseService(models.Model):
 
 
 class FacadeService(models.Model):
+    status = models.CharField(
+        max_length=100,
+        default='NonSelected',
+        choices=STATUS_CHOICES
+    )
+    rank = models.PositiveIntegerField(default=0,null=True)
     LAYER_TYPE = [
         ('Enduit Monocouche', 'Enduit Monocouche'),
         ('Acrylic Mortar Coating', 'Acrylic Mortar Coating'),
