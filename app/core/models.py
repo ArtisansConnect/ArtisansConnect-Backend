@@ -780,21 +780,22 @@ class Project(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # Save the project first
 
-        gantt_order = [
-            'electrical',
-            'plumbing',
-            'hvac',
-            'painting',
-            'flooring',
-            'carpentary',
-            'facade',
-            'roofing',
-            'construction',
+        gantt_rank_groups = [
+            ['construction'],                      # Rank 1
+            ['electrical', 'plumbing', 'hvac'],    # Rank 2
+            ['painting'],                          # Rank 3
+            ['flooring'],                          # Rank 4
+            ['carpentary', 'facade', 'roofing'],   # Rank 5
         ]
 
-        for rank, service_field in enumerate(gantt_order, start=1):
-            service_instance = getattr(self, service_field)
-            if service_instance:
-                service_instance.status = 'Selected'
-                service_instance.rank = rank
-                service_instance.save()
+        current_rank = 1
+        for group in gantt_rank_groups:
+            group_has_selected = any(getattr(self, service) is not None for service in group)
+            if group_has_selected:
+                for service in group:
+                    service_instance = getattr(self, service)
+                    if service_instance:
+                        service_instance.status = 'Selected'
+                        service_instance.rank = current_rank
+                        service_instance.save()
+                current_rank += 1  # Only increment if at least one service in the group was filled
