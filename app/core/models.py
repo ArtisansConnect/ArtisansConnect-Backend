@@ -776,3 +776,25 @@ class Project(models.Model):
     facade = models.ForeignKey(FacadeService,on_delete=models.CASCADE,blank=True,null=True)
     status = models.CharField(max_length=100,choices=STATUS_TYPE,default='PENDING')
     start_date = models.DateField(null=True,blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Save the project first
+
+        gantt_order = [
+            'electrical',
+            'plumbing',
+            'hvac',
+            'painting',
+            'flooring',
+            'carpentary',
+            'facade',
+            'roofing',
+            'construction',
+        ]
+
+        for rank, service_field in enumerate(gantt_order, start=1):
+            service_instance = getattr(self, service_field)
+            if service_instance:
+                service_instance.status = 'Selected'
+                service_instance.rank = rank
+                service_instance.save()
