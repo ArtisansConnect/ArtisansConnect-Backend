@@ -827,7 +827,43 @@ class Project(models.Model):
                 current_rank += 1  # Only increment if at least one service in the group was filled
 
 
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, time
+
+WORK_START = time(8, 0)
+LUNCH_START = time(12, 0)
+LUNCH_END = time(13, 0)
+WORK_END = time(17, 0)
+HOURS_PER_DAY = 8
+
+def add_working_hours(start_datetime, hours):
+    current = start_datetime
+    remaining_hours = hours
+
+    while remaining_hours > 0:
+        # Move to next working time if current is outside working hours
+        if current.time() < WORK_START:
+            current = current.replace(hour=8, minute=0)
+        elif LUNCH_START <= current.time() < LUNCH_END:
+            current = current.replace(hour=13, minute=0)
+        elif current.time() >= WORK_END:
+            current = (current + timedelta(days=1)).replace(hour=8, minute=0)
+
+        # Determine available working time for the current slot
+        if current.time() < LUNCH_START:
+            available_until = current.replace(hour=12, minute=0)
+        elif current.time() < WORK_END:
+            available_until = current.replace(hour=17, minute=0)
+        else:
+            # Should not reach here
+            continue
+
+        delta = (available_until - current).total_seconds() / 3600.0
+        working_hours = min(remaining_hours, delta)
+
+        current += timedelta(hours=working_hours)
+        remaining_hours -= working_hours
+
+    return current
 
 class Planification(models.Model):
     project = models.OneToOneField(Project, on_delete=models.CASCADE)
@@ -835,7 +871,6 @@ class Planification(models.Model):
     end_date = models.DateTimeField(editable=False)
 
     def save(self, *args, **kwargs):
-        # Map each service name to its instance
         service_fields = [
             'construction', 'electrical', 'plumbing', 'hvac',
             'painting', 'flooring', 'carpentary', 'roofing', 'facade'
@@ -864,19 +899,15 @@ class Planification(models.Model):
             max_end = current_start
 
             for service in services_in_rank:
-                # Calculate service duration in days based on 8 hours/day
                 hours_needed = service.time or 0
-                days_needed = hours_needed / 8
-                delta = timedelta(days=days_needed)
-
                 service.start_date = current_start
-                service.end_date = current_start + delta
+                service.end_date = add_working_hours(current_start, hours_needed)
                 service.save()
 
                 if service.end_date > max_end:
                     max_end = service.end_date
 
-            current_start = max_end  # next rank starts after current one finishes
+            current_start = max_end
 
         self.end_date = current_start
         super().save(*args, **kwargs)
