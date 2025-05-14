@@ -9,13 +9,14 @@ from .models import (ElectricalService,
                      RoofingService,
                      ConstructionHouseService,
                      FacadeService,
-                     Project)
+                     Project,
+                     Planification)
 
 class ElectricalServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ElectricalService
         fields = '__all__'
-        read_only_fields = ['user','cost', 'cableLength']
+        read_only_fields = ['user','cost', 'cableLength','time']
 
 
 class PaintingServiceSerializer(serializers.ModelSerializer):
@@ -90,7 +91,7 @@ class HvacProjectSerializer(serializers.ModelSerializer):
 class FlooringProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = FlooringService
-        fields = ['id','user','cost']         
+        fields = ['id','time','cost']         
 
 class PlumbingProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -172,3 +173,9 @@ class ProjectListSerializer(serializers.ModelSerializer):
         ]
         total = round(sum([c for c in cost_fields if c is not None]),0)
         return total
+    
+
+class PlanificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Planification
+        fields = '__all__'
