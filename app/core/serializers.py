@@ -144,19 +144,29 @@ class ProjectListSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['user','start_date','status']                   
 
-    def get_total_time(self,obj):
-        time_fields = [
-            getattr(obj.electrical, 'time',0), 
-            getattr(obj.painting, 'time', 0),
-            getattr(obj.hvac, 'time', 0),
-            getattr(obj.plumbing, 'time', 0),
-            getattr(obj.flooring, 'time', 0),
-            getattr(obj.carpentary, 'time', 0),
-            getattr(obj.roofing, 'time', 0),
-            getattr(obj.construction, 'time', 0),
-            getattr(obj.facade, 'time', 0),
-        ]
-        total = round(sum([t for t in time_fields if t is not None]),0)
+    def get_total_time(self, obj):
+        # Helper to safely get time or return 0 if None
+        def safe_time(service):
+            return getattr(service, 'time', 0) or 0
+
+        construction_time = safe_time(obj.construction)
+        group1 = max(
+            safe_time(obj.electrical),
+            safe_time(obj.plumbing),
+            safe_time(obj.hvac)
+        )
+        painting_time = safe_time(obj.painting)
+        flooring_time = safe_time(obj.flooring)
+        group2 = max(
+            safe_time(obj.carpentary),
+            safe_time(obj.facade),
+            safe_time(obj.roofing)
+        )
+
+        total = round(
+            construction_time + group1 + painting_time + flooring_time + group2,
+            0
+        )
         return total
     
     def get_total_cost(self, obj):
