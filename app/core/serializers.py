@@ -75,48 +75,48 @@ class FacadeServiceSerializer(serializers.ModelSerializer):
 class ElectricalProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = ElectricalService
-        fields = ['id','time','cost']
+        fields = ['id','time','cost','start_date','end_date','rank']
 
 
 class PaintingProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaintingService
-        fields = ['id','time','cost']
+        fields = ['id','time','cost','start_date','end_date','rank']
 
 class HvacProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = HvacService
-        fields = ['id','time','cost']        
+        fields = ['id','time','cost','start_date','end_date','rank']        
 
 class FlooringProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = FlooringService
-        fields = ['id','time','cost']         
+        fields = ['id','time','cost','start_date','end_date','rank']         
 
 class PlumbingProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaintingService
-        fields = ['id','time','cost']
+        fields = ['id','time','cost','start_date','end_date','rank']
 
 class CarpentaryProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = WindowsDoorsService
-        fields = ['id','time','cost']
+        fields = ['id','time','cost','start_date','end_date','rank']
 
 class RoofingProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoofingService
-        fields = ['id','time','cost']
+        fields = ['id','time','cost','start_date','end_date','rank']
 
 class ConstructionProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConstructionHouseService
-        fields = ['id','time','cost']        
+        fields = ['id','time','cost','start_date','end_date','rank']        
 
 class FacadeProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = FacadeService
-        fields = ['id','time','cost']           
+        fields = ['id','time','cost','start_date','end_date','rank']           
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -173,9 +173,33 @@ class ProjectListSerializer(serializers.ModelSerializer):
         ]
         total = round(sum([c for c in cost_fields if c is not None]),0)
         return total
-    
+
+
+
+# Planification Serializer
+class ProjectPlanificationSerializer(serializers.ModelSerializer):
+    electrical = ElectricalProjectSerializer(read_only=True)
+    painting = PaintingProjectSerializer(read_only=True)
+    hvac = HvacProjectSerializer(read_only=True)
+    flooring = FlooringProjectSerializer(read_only=True)
+    plumbing = PlumbingProjectSerializer(read_only=True)
+    carpentary = CarpentaryProjectSerializer(read_only=True)
+    roofing = RoofingProjectSerializer(read_only=True)
+    construction = ConstructionProjectSerializer(read_only=True)
+    facade = FacadeProjectSerializer(read_only=True)
+    class Meta:
+        model = Project
+        fields = '__all__'
+        read_only_fields = ['user','status']       
+
 
 class PlanificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Planification
-        fields = '__all__'
+        fields = '__all__'     
+        
+class PlanificationListSerializer(serializers.ModelSerializer):
+    project = ProjectPlanificationSerializer(read_only=True)
+    class Meta:
+        model = Planification
+        fields = '__all__'                        

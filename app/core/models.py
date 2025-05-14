@@ -652,7 +652,7 @@ class RoofingService(models.Model):
         time_model = model['time_model']
         cost_model = model['cost_model']
         # predict time and cost
-        self.time = float(time_model.predict(input_data)[0])
+        self.time = round(float(time_model.predict(input_data)[0]),0)
         self.cost = float(cost_model.predict(input_data)[0])
         # save to DB
         super().save(*args,**kwargs)
@@ -803,6 +803,9 @@ class Project(models.Model):
     status = models.CharField(max_length=100,choices=STATUS_TYPE,default='PENDING')
     start_date = models.DateField(null=True,blank=True)
 
+    def __str__(self):
+        return f'{self.id} - {self.user}'
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # Save the project first
 
@@ -847,6 +850,11 @@ def add_working_hours(start_datetime, hours):
             current = current.replace(hour=13, minute=0)
         elif current.time() >= WORK_END:
             current = (current + timedelta(days=1)).replace(hour=8, minute=0)
+
+        # 🟡 Skip weekends
+        while current.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
+            current += timedelta(days=1)
+            current = current.replace(hour=8, minute=0)    
 
         # Determine available working time for the current slot
         if current.time() < LUNCH_START:
