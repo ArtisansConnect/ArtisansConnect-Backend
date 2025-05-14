@@ -108,6 +108,7 @@ class RoofingProjectSerializer(serializers.ModelSerializer):
         model = RoofingService
         fields = ['id','time','cost','start_date','end_date','rank']
 
+
 class ConstructionProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConstructionHouseService

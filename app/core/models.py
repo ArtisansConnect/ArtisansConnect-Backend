@@ -918,4 +918,9 @@ class Planification(models.Model):
             current_start = max_end
 
         self.end_date = current_start
+
+        if self.project.status == 'PENDING':
+            self.project.status = 'ACCEPTED'
+            self.project.save()
+            
         super().save(*args, **kwargs)
