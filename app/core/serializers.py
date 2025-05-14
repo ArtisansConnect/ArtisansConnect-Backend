@@ -90,7 +90,7 @@ class HvacProjectSerializer(serializers.ModelSerializer):
 class FlooringProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = FlooringService
-        fields = ['id','user','cost']         
+        fields = ['id','time','cost']         
 
 class PlumbingProjectSerializer(serializers.ModelSerializer):
     class Meta:
