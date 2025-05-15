@@ -11,7 +11,8 @@ from .models import (ElectricalService,
                      RoofingService,
                      ConstructionHouseService,
                      FacadeService,
-                     Project)
+                     Project,
+                     Planification)
 from .serializers import (ElectricalServiceSerializer,
                           PaintingServiceSerializer,
                           FlooringServiceSerializer,
@@ -22,7 +23,9 @@ from .serializers import (ElectricalServiceSerializer,
                           ConstructionHouseSerializer,
                           FacadeServiceSerializer,
                           ProjectSerializer,
-                          ProjectListSerializer)
+                          ProjectListSerializer,
+                          PlanificationSerializer,
+                          PlanificationListSerializer)
 
 class ElectricalServiceViewSet(viewsets.ModelViewSet):
     queryset = ElectricalService.objects.all()
@@ -144,3 +147,23 @@ class ProjectListView(APIView):
         instance = Project.objects.filter(user=request.user)
         serializer = ProjectListSerializer(instance,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+    
+
+class PlanificationView(APIView):
+    serializer_class = PlanificationSerializer
+
+    def post(self,request):
+        serializer = PlanificationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+
+class PlanificationListView(APIView):
+    serializer_class = PlanificationListSerializer
+
+    def get(self,request):
+        instance = Planification.objects.all()
+        serializer = PlanificationListSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)    

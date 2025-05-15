@@ -115,6 +115,9 @@ class ElectricalService(models.Model):
     marqueur = models.BooleanField(default=False)
     cost = models.FloatField()
     time = models.FloatField(null=True, editable=False)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+
 
     def save(self, *args, **kwargs):
         self.cableLength = self.calculate_cable_length()
@@ -189,6 +192,9 @@ class PaintingService(models.Model):
     IsPlastering = models.BooleanField()
     cost = models.FloatField()
     time = models.FloatField(null=True, blank=True)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+
 
     def save(self, *args, **kwargs):
         model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'painting_model.pkl')
@@ -236,6 +242,9 @@ class FlooringService(models.Model):
     
     cost = models.FloatField(editable=False)
     time = models.FloatField(editable=False,null=True,blank=True)  # in hours
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+
 
     def save(self, *args, **kwargs):
         # Load the trained model
@@ -270,6 +279,9 @@ class HvacService(models.Model):
     bigHvac = models.IntegerField()
     cost = models.FloatField(editable=False)
     time = models.FloatField(editable=False,null=True,blank=True)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+
 
     def save(self, *args, **kwargs):
         # Load the model only when saving
@@ -423,6 +435,9 @@ class PlumbingService(models.Model):
 
     cost = models.FloatField()
     time = models.FloatField()
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+
 
     def load_model(self):
         """Load the trained RandomForest model using joblib"""
@@ -534,6 +549,9 @@ class WindowsDoorsService(models.Model):
     )
     time = models.FloatField(null=True, blank=True)
     cost = models.FloatField(null=True, blank=True)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+
 
     def load_model(self):
         """Load the trained RandomForest model using joblib"""
@@ -614,6 +632,9 @@ class RoofingService(models.Model):
     )   
     time = models.FloatField(null=True, blank=True)
     cost = models.FloatField(null=True, blank=True)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+
 
     def load_model(self):
         model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'roofing_models.pkl')
@@ -631,7 +652,7 @@ class RoofingService(models.Model):
         time_model = model['time_model']
         cost_model = model['cost_model']
         # predict time and cost
-        self.time = float(time_model.predict(input_data)[0])
+        self.time = round(float(time_model.predict(input_data)[0]),0)
         self.cost = float(cost_model.predict(input_data)[0])
         # save to DB
         super().save(*args,**kwargs)
@@ -682,6 +703,9 @@ class ConstructionHouseService(models.Model):
     )
     cost = models.FloatField()
     time = models.FloatField()
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+
 
     def save(self, *args, **kwargs):
         # Load the AI model
@@ -733,6 +757,8 @@ class FacadeService(models.Model):
     Hydrofuge = models.BooleanField(default=False)
     cost = models.FloatField(blank=True, null=True)
     time = models.FloatField(blank=True, null=True)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
 
     def save(self, *args, **kwargs):
         try:
@@ -777,6 +803,9 @@ class Project(models.Model):
     status = models.CharField(max_length=100,choices=STATUS_TYPE,default='PENDING')
     start_date = models.DateField(null=True,blank=True)
 
+    def __str__(self):
+        return f'{self.id} - {self.user}'
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # Save the project first
 
@@ -799,3 +828,99 @@ class Project(models.Model):
                         service_instance.rank = current_rank
                         service_instance.save()
                 current_rank += 1  # Only increment if at least one service in the group was filled
+
+
+from datetime import timedelta, datetime, time
+
+WORK_START = time(8, 0)
+LUNCH_START = time(12, 0)
+LUNCH_END = time(13, 0)
+WORK_END = time(17, 0)
+HOURS_PER_DAY = 8
+
+def add_working_hours(start_datetime, hours):
+    current = start_datetime
+    remaining_hours = hours
+
+    while remaining_hours > 0:
+        # Move to next working time if current is outside working hours
+        if current.time() < WORK_START:
+            current = current.replace(hour=8, minute=0)
+        elif LUNCH_START <= current.time() < LUNCH_END:
+            current = current.replace(hour=13, minute=0)
+        elif current.time() >= WORK_END:
+            current = (current + timedelta(days=1)).replace(hour=8, minute=0)
+
+        # 🟡 Skip weekends
+        while current.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
+            current += timedelta(days=1)
+            current = current.replace(hour=8, minute=0)    
+
+        # Determine available working time for the current slot
+        if current.time() < LUNCH_START:
+            available_until = current.replace(hour=12, minute=0)
+        elif current.time() < WORK_END:
+            available_until = current.replace(hour=17, minute=0)
+        else:
+            # Should not reach here
+            continue
+
+        delta = (available_until - current).total_seconds() / 3600.0
+        working_hours = min(remaining_hours, delta)
+
+        current += timedelta(hours=working_hours)
+        remaining_hours -= working_hours
+
+    return current
+
+class Planification(models.Model):
+    project = models.OneToOneField(Project, on_delete=models.CASCADE)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField(editable=False)
+
+    def save(self, *args, **kwargs):
+        service_fields = [
+            'construction', 'electrical', 'plumbing', 'hvac',
+            'painting', 'flooring', 'carpentary', 'roofing', 'facade'
+        ]
+        services = {
+            name: getattr(self.project, name)
+            for name in service_fields
+            if getattr(self.project, name) is not None
+        }
+
+        # Group services by rank
+        services_by_rank = {}
+        for service in services.values():
+            if service.rank not in services_by_rank:
+                services_by_rank[service.rank] = []
+            services_by_rank[service.rank].append(service)
+
+        current_start = self.start_date
+        max_rank = max(services_by_rank.keys())
+
+        for rank in range(1, max_rank + 1):
+            if rank not in services_by_rank:
+                continue
+
+            services_in_rank = services_by_rank[rank]
+            max_end = current_start
+
+            for service in services_in_rank:
+                hours_needed = service.time or 0
+                service.start_date = current_start
+                service.end_date = add_working_hours(current_start, hours_needed)
+                service.save()
+
+                if service.end_date > max_end:
+                    max_end = service.end_date
+
+            current_start = max_end
+
+        self.end_date = current_start
+
+        if self.project.status == 'PENDING':
+            self.project.status = 'ACCEPTED'
+            self.project.save()
+            
+        super().save(*args, **kwargs)
