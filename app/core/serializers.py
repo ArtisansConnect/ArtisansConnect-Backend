@@ -208,6 +208,7 @@ class PlanificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Planification
         fields = '__all__'     
+        read_only_fields = ['user'] 
         
 class PlanificationListSerializer(serializers.ModelSerializer):
     project = ProjectPlanificationSerializer(read_only=True)
@@ -221,4 +222,3 @@ class UpdateProjectStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = 'status'      
-                                        
