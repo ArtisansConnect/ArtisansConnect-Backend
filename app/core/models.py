@@ -927,3 +927,4 @@ class Planification(models.Model):
             self.project.save()
             
         super().save(*args, **kwargs)
+        
