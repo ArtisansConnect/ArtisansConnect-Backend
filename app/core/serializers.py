@@ -213,4 +213,12 @@ class PlanificationListSerializer(serializers.ModelSerializer):
     project = ProjectPlanificationSerializer(read_only=True)
     class Meta:
         model = Planification
-        fields = '__all__'                        
+        fields = '__all__'  
+
+
+# The manager can refuse the project request
+class UpdateProjectStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = 'status'      
+                                        

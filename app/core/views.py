@@ -25,7 +25,16 @@ from .serializers import (ElectricalServiceSerializer,
                           ProjectSerializer,
                           ProjectListSerializer,
                           PlanificationSerializer,
-                          PlanificationListSerializer)
+                          PlanificationListSerializer,
+                          UpdateProjectStatusSerializer,
+                          ProjectPlanificationSerializer)
+
+from .permissions import (
+    IsAdmin,
+    IsArtisan,
+    IsClient,
+    IsManager
+)
 
 class ElectricalServiceViewSet(viewsets.ModelViewSet):
     queryset = ElectricalService.objects.all()
@@ -160,10 +169,40 @@ class PlanificationView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 
+# The Client can Access their Planification created by Manager
 class PlanificationListView(APIView):
     serializer_class = PlanificationListSerializer
+    permission_classes = [IsClient]
 
     def get(self,request):
-        instance = Planification.objects.all()
+        instance = Planification.objects.filter(user=request.user)
         serializer = PlanificationListSerializer(instance,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)    
+        return Response(serializer.data,status=status.HTTP_200_OK)   
+
+
+# The manager can refuse the project request
+class RefuseProject(APIView):
+    serializer_class = UpdateProjectStatusSerializer
+    permission_classes = [IsManager]
+
+    def put(self, request,pk=None):
+        try:
+            instance = Project.objects.get(pk=pk)
+        except Project.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND) 
+        serializer = UpdateProjectStatusSerializer(instance,data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+
+# The Manager could see all the client projects
+class ManagerListProject(APIView):
+    serializer_class = ProjectPlanificationSerializer
+    permission_classes = [IsManager]
+
+    def get(self,request,pk=None):
+        instance = Project.objects.get(pk=pk)
+        serializer = ProjectPlanificationSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)

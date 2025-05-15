@@ -877,8 +877,11 @@ class Planification(models.Model):
     project = models.OneToOneField(Project, on_delete=models.CASCADE)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(editable=False)
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,null=True)
 
     def save(self, *args, **kwargs):
+        if self.project:
+            self.user = self.project.user
         service_fields = [
             'construction', 'electrical', 'plumbing', 'hvac',
             'painting', 'flooring', 'carpentary', 'roofing', 'facade'

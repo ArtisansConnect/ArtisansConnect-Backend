@@ -13,7 +13,8 @@ from .views import (
     ProjectViewSet,
     ProjectListView,
     PlanificationView,
-    PlanificationListView
+    PlanificationListView,
+    RefuseProject
 )
 
 router = DefaultRouter()
@@ -32,5 +33,6 @@ urlpatterns = [
     path('', include(router.urls)),  
     path('project-list/', ProjectListView.as_view()),
     path('planification/', PlanificationView.as_view()),
-    path('planification/list/', PlanificationListView.as_view())
+    path('planification/list/', PlanificationListView.as_view()),
+    path('project/refuse/<int:pk>/',RefuseProject.as_view())
 ]
