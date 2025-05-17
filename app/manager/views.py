@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from core.serializers import (
+    PlanificationSerializer,
     PlanificationListSerializer,
     UpdateProjectStatusSerializer,
     ProjectPlanificationSerializer
@@ -11,6 +12,16 @@ from core.models import (
 from rest_framework.response import Response
 from rest_framework import status,permissions
 
+# The Manager can create a new planification
+class PlanificationView(APIView):
+    serializer_class = PlanificationSerializer
+
+    def post(self,request):
+        serializer = PlanificationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 # The Manager can Access their Planification created by Manager
 class PlanificationListViewManager(APIView):

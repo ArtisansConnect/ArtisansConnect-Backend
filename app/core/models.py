@@ -32,6 +32,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
+    image = models.ImageField(upload_to='profile_images/',blank=True,null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['firstName','lastName','phoneNumber','role']
@@ -801,7 +802,7 @@ class Project(models.Model):
     roofing = models.ForeignKey(RoofingService,on_delete=models.CASCADE,blank=True,null=True)
     facade = models.ForeignKey(FacadeService,on_delete=models.CASCADE,blank=True,null=True)
     status = models.CharField(max_length=100,choices=STATUS_TYPE,default='PENDING')
-    start_date = models.DateField(null=True,blank=True)
+    creation_date = models.DateField(null=True,auto_now_add=True,editable=False)
 
     def __str__(self):
         return f'{self.id} - {self.user}'
@@ -880,6 +881,8 @@ class Planification(models.Model):
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,null=True)
 
     def save(self, *args, **kwargs):
+        if self.start_date:
+            self.start_date = self.start_date.replace(hour=8,minute=0,second=0,microsecond=0)
         if self.project:
             self.user = self.project.user
         service_fields = [

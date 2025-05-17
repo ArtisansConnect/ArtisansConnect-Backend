@@ -158,17 +158,6 @@ class ProjectListView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
     
 
-class PlanificationView(APIView):
-    serializer_class = PlanificationSerializer
-
-    def post(self,request):
-        serializer = PlanificationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
-
 # The Client can Access their Planification created by Manager
 class PlanificationListView(APIView):
     serializer_class = PlanificationListSerializer
