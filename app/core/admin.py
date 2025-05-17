@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import (CustomUser,
                      ElectricalService,
                      PaintingService,
@@ -12,7 +13,6 @@ from .models import (CustomUser,
                      Project,
                      Planification)
 
-admin.site.register(CustomUser)
 admin.site.register(ElectricalService)
 admin.site.register(PaintingService)
 admin.site.register(FlooringService)
@@ -24,3 +24,14 @@ admin.site.register(RoofingService)
 admin.site.register(WindowsDoorsService)
 admin.site.register(Project)
 admin.site.register(Planification)
+
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ('email', 'firstName', 'lastName', 'role', 'image_tag')
+
+    def image_tag(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="50" style="border-radius:50%;"/>'.format(obj.image.url))
+        return "-"
+    image_tag.short_description = 'Profile Image'
+
+admin.site.register(CustomUser, CustomUserAdmin)    
