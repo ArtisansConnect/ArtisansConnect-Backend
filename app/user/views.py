@@ -4,7 +4,8 @@ from core.models import CustomUser
 from .serializers import (
     RegisterSerializer,
     CustomTokenObtainPairSerializer,
-    UpdateUserSerializer
+    UpdateUserSerializer,
+    ProfileUserSerializer
     )
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -19,6 +20,13 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class UpdateProfile(generics.UpdateAPIView):
     serializer_class = UpdateUserSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+    
+class ViewProfile(generics.RetrieveAPIView):  
+    serializer_class = ProfileUserSerializer
+    permission_classes = [IsAuthenticated]  
 
     def get_object(self):
         return self.request.user
