@@ -57,3 +57,9 @@ class UpdateUserSerializer(ModelSerializer):
 
             instance.save()
             return instance
+        
+
+class ProfileUserSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email','firstName','lastName','image'] 
