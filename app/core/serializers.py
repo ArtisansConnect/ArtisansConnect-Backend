@@ -221,4 +221,5 @@ class PlanificationListSerializer(serializers.ModelSerializer):
 class UpdateProjectStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['status']      
+        fields = ['id','status']      
+        read_only_fields = ['id']
