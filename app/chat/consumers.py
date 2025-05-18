@@ -16,6 +16,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+        await self.send_history()
 
     async def send_history(self):
         from asgiref.sync import sync_to_async
