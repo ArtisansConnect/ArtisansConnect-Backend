@@ -1,5 +1,8 @@
+# chat/consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from core.models import Message
+from datetime import datetime
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -11,9 +14,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
         await self.accept()
 
+    async def send_history(self):
+        from asgiref.sync import sync_to_async
+        messages = await sync_to_async(list)(
+            Message.objects.filter(room_name=self.room_name).order_by('-timestamp')[:50]
+        )
+        for msg in reversed(messages):
+            await self.send(text_data=json.dumps({
+                'message': msg.message,
+                'sender': msg.sender,
+                'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            }))    
+
     async def disconnect(self, close_code):
+        # Leave room group
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -21,10 +38,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        sender = self.scope["user"].username
         message = data['message']
+        sender = data.get('sender', 'Anonymous')
 
-        # Broadcast message
+        # 1. Save to DB
+        await self.save_message(sender, self.room_name, message)
+
+        # 2. Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -39,3 +59,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': event['message'],
             'sender': event['sender']
         }))
+
+    @staticmethod
+    async def save_message(sender, room, message):
+        from asgiref.sync import sync_to_async
+        await sync_to_async(Message.objects.create)(
+            sender=sender,
+            room_name=room,
+            message=message
+        )
