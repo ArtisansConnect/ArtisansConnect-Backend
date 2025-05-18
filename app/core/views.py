@@ -158,17 +158,6 @@ class ProjectListView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
     
 
-class PlanificationView(APIView):
-    serializer_class = PlanificationSerializer
-
-    def post(self,request):
-        serializer = PlanificationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
-
 # The Client can Access their Planification created by Manager
 class PlanificationListView(APIView):
     serializer_class = PlanificationListSerializer
@@ -178,12 +167,21 @@ class PlanificationListView(APIView):
         instance = Planification.objects.filter(user=request.user)
         serializer = PlanificationListSerializer(instance,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)   
+    
+# The Manager can Access their Planification created by Manager
+class PlanificationListViewManager(APIView):
+    serializer_class = PlanificationListSerializer
+
+    def get(self,request):
+        instance = Planification.objects.all()
+        serializer = PlanificationListSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)       
 
 
 # The manager can refuse the project request
 class RefuseProject(APIView):
     serializer_class = UpdateProjectStatusSerializer
-    permission_classes = [IsManager]
+    # permission_classes = [IsManager]
 
     def put(self, request,pk=None):
         try:
@@ -200,10 +198,10 @@ class RefuseProject(APIView):
 # The Manager could see all the client projects
 class ManagerListProject(APIView):
     serializer_class = ProjectPlanificationSerializer
-    permission_classes = [IsManager]
+    # permission_classes = [IsManager]
 
-    def get(self,request,pk=None):
-        instance = Project.objects.get(pk=pk)
+    def get(self,request):
+        instance = Project.objects.all()
         serializer = ProjectPlanificationSerializer(instance,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     
