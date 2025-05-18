@@ -206,3 +206,4 @@ class ManagerListProject(APIView):
         instance = Project.objects.get(pk=pk)
         serializer = ProjectPlanificationSerializer(instance,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+    
