@@ -222,4 +222,3 @@ class UpdateProjectStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ['id','status']      
-        read_only_fields = ['id']

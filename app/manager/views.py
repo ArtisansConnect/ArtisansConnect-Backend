@@ -49,7 +49,7 @@ class RefuseProject(APIView):
     serializer_class = UpdateProjectStatusSerializer
     # permission_classes = [IsManager]
 
-    def put(self, request, pk=None):
+    def patch(self, request, pk=None):
         try:
             instance = Project.objects.get(pk=pk)
         except Project.DoesNotExist:
