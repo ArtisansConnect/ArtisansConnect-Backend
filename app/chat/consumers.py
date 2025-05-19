@@ -17,7 +17,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f"chat_{self.room_name}"
 
-        # Authenticate the user using JWT token
         self.user = await self.get_user_from_token()
         self.scope['user'] = self.user
 
@@ -49,62 +48,59 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender_display_name = f"{self.user.firstName} {self.user.lastName}".strip() or self.user.email
             sender_user = self.user
 
-        await self.save_message(sender_user, self.room_name, message)
+        await self.save_message(sender_user, message)
 
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
                 'message': message,
-                'sender': sender_display_name
+                'sender': sender_display_name,
             }
         )
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
             'message': event['message'],
-            'sender': event['sender']
+            'sender': event['sender'],
         }))
 
     async def send_history(self):
-        messages = await sync_to_async(list)(
-            Message.objects.filter(room_name=self.room_name).order_by('-timestamp')[:50]
-        )
-        for msg in reversed(messages):
-            sender = msg.sender
-            if sender:
-                sender_name = f"{sender.firstName} {sender.lastName}".strip() or sender.email
-            else:
-                sender_name = "Anonymous"
-
+        messages = await self.get_messages()
+        for msg in messages:
+            sender = await self.get_message_sender(msg)
+            sender_display_name = (
+                f"{sender.firstName} {sender.lastName}".strip()
+                if sender else "Anonymous"
+            )
             await self.send(text_data=json.dumps({
                 'message': msg.message,
-                'sender': sender_name,
-                'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                'sender': sender_display_name,
             }))
 
-    @staticmethod
-    async def save_message(sender, room, message):
-        await sync_to_async(Message.objects.create)(
-            sender=sender,
-            room_name=room,
-            message=message
-        )
+    @sync_to_async
+    def get_messages(self):
+        return Message.objects.filter(room_name=self.room_name).order_by('-timestamp')[:20][::-1]
 
-    async def get_user_from_token(self):
+    @sync_to_async
+    def get_message_sender(self, msg):
+        return msg.sender if msg.sender_id else None
+
+    @sync_to_async
+    def save_message(self, sender, message):
+        Message.objects.create(sender=sender, content=message, room_name=self.room_name)
+
+    @sync_to_async
+    def get_user_from_token(self):
+        query_string = self.scope['query_string'].decode()
+        query_params = parse_qs(query_string)
+        token = query_params.get('token', [None])[0]
+
+        if not token:
+            return AnonymousUser()
+
         try:
-            query_string = self.scope['query_string'].decode()
-            params = parse_qs(query_string)
-            token = params.get('token', [None])[0]
-
-            if not token:
-                return AnonymousUser()
-
-            # Decode token (should match your JWT settings)
-            decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            user_id = decoded.get('user_id')
-            user = await sync_to_async(User.objects.get)(id=user_id)
-            return user
-        except Exception as e:
-            print("Auth error:", e)
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            return User.objects.get(id=payload['user_id'])
+        except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
             return AnonymousUser()
