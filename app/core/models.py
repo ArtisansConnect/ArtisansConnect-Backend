@@ -935,7 +935,8 @@ class Planification(models.Model):
 class Message(models.Model):
     sender = models.ForeignKey(CustomUser,on_delete=models.CASCADE,max_length=255,null=True)
     room_name = models.CharField(max_length=255,null=True)
-    message = models.TextField()
+    receiver = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL, related_name='received_messages')
+    content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
