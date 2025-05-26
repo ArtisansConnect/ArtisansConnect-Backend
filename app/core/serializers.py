@@ -10,7 +10,8 @@ from .models import (ElectricalService,
                      ConstructionHouseService,
                      FacadeService,
                      Project,
-                     Planification)
+                     Planification,
+                     CustomUser)
 
 class ElectricalServiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -186,9 +187,15 @@ class ProjectListSerializer(serializers.ModelSerializer):
         return total
 
 
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email','firstName','lastName','phoneNumber','image']
+
 
 # Planification Serializer
 class ProjectPlanificationSerializer(serializers.ModelSerializer):
+    userDetails = UserDetailSerializer(source='user',read_only=True)
     electrical = ElectricalProjectSerializer(read_only=True)
     painting = PaintingProjectSerializer(read_only=True)
     hvac = HvacProjectSerializer(read_only=True)
