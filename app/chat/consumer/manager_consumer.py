@@ -1,73 +1,82 @@
-# chat/consumers/manager_consumer.py
-
 import json
-import jwt
 from channels.generic.websocket import AsyncWebsocketConsumer
-from core.models import Message
+from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
-from asgiref.sync import sync_to_async
 from urllib.parse import parse_qs
-from django.conf import settings
-from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import AccessToken
+from core.models import Message, CustomUser  # Adjust import paths as needed
 
-User = get_user_model()
 
 class ManagerConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = await self.get_user_from_token()
+        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+
         if isinstance(self.user, AnonymousUser) or not self.user.is_staff:
             await self.close()
             return
 
-        await self.channel_layer.group_add("manager_room", self.channel_name)
+        await self.channel_layer.group_add(self.room_name, self.channel_name)
         await self.accept()
 
+        # Send all previous messages in the room
+        messages = await self.get_messages(self.room_name)
+        for msg in messages:
+            await self.send(text_data=json.dumps(msg))
+
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard("manager_room", self.channel_name)
+        await self.channel_layer.group_discard(self.room_name, self.channel_name)
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        message = data['message']
-        room = data['room']  # Example: "client_5"
+        message = data.get("message")
 
-        await self.save_message(self.user, room, message)
+        if message:
+            await self.save_message(self.room_name, self.user, message)
 
-        await self.channel_layer.group_send(
-            room,
-            {
-                'type': 'chat_message',
-                'message': message,
-                'sender': "Manager",
-            }
-        )
+            await self.channel_layer.group_send(
+                self.room_name,
+                {
+                    "type": "chat_message",
+                    "message": message,
+                    "sender": f"{self.user.firstName} {self.user.lastName}".strip(),
+                }
+            )
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
-            'message': event['message'],
-            'sender': event['sender'],
-            'room': event.get('room', None),
+            "message": event["message"],
+            "sender": event["sender"],
         }))
 
-    @sync_to_async
-    def save_message(self, sender, room, content):
-        try:
-            client_id = int(room.split('_')[1])
-            client = User.objects.get(id=client_id)
-            Message.objects.create(sender=sender, receiver=client, content=content, room_name=room)
-        except (IndexError, ValueError, User.DoesNotExist):
-            pass  # log error or handle appropriately
-
-    @sync_to_async
+    @database_sync_to_async
     def get_user_from_token(self):
-        query_string = self.scope['query_string'].decode()
-        query_params = parse_qs(query_string)
-        token = query_params.get('token', [None])[0]
+        query_string = self.scope["query_string"].decode()
+        params = parse_qs(query_string)
+        token = params.get("token", [None])[0]
 
         if not token:
             return AnonymousUser()
 
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-            return User.objects.get(id=payload['user_id'])
-        except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
+            validated_token = AccessToken(token)
+            user_id = validated_token["user_id"]
+            return CustomUser.objects.get(id=user_id)
+        except Exception:
             return AnonymousUser()
+
+    @database_sync_to_async
+    def save_message(self, room_name, sender, content):
+        return Message.objects.create(room_name=room_name, sender=sender, content=content)
+
+    @database_sync_to_async
+    def get_messages(self, room_name):
+        messages = Message.objects.filter(room_name=room_name).select_related("sender").order_by("timestamp")
+        return [
+            {
+                "message": msg.content,
+                "timestamp": str(msg.timestamp),
+                "sender": f"{msg.sender.firstName} {msg.sender.lastName}".strip() if msg.sender else "Unknown",
+            }
+            for msg in messages
+        ]

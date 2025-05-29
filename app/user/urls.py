@@ -7,12 +7,14 @@ from rest_framework_simplejwt.views import (
 from user.views import (
     CustomTokenObtainPairView,
     UpdateProfile,
-    ViewProfile
+    ViewProfile,
+    ListUsers
     )
 
 urlpatterns = [
     path('register/',view=Signup.as_view(),name='register'),
     path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('profile/',ViewProfile.as_view()),
+    path('users/',ListUsers.as_view()),
     path('update/',UpdateProfile.as_view())
 ]

@@ -119,6 +119,18 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'artcon',
+#         'USER': 'wailbnlh',
+#         'PASSWORD': '0000',
+#         'HOST': 'localhost',  # or your remote host/IP
+#         'PORT': '5432',        # default PostgreSQL port
+#     }
+# }
+
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
