@@ -5,9 +5,11 @@ from .serializers import (
     RegisterSerializer,
     CustomTokenObtainPairSerializer,
     UpdateUserSerializer,
-    ProfileUserSerializer
+    ProfileUserSerializer,
+    ProfilesUsersSerializer
     )
 from rest_framework_simplejwt.views import TokenObtainPairView
+from core.permissions import IsManager
 
 class Signup(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -30,3 +32,10 @@ class ViewProfile(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+    
+class ListUsers(generics.ListAPIView):
+    serializer_class = ProfilesUsersSerializer
+    permission_classes = [IsManager]  
+
+    def get_queryset(self):
+        return CustomUser.objects.all() 
