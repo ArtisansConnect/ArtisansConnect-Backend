@@ -666,69 +666,34 @@ class ConstructionHouseService(models.Model):
         choices=STATUS_CHOICES
     )
     rank = models.PositiveIntegerField(default=0,null=True)
-    HOUSE_TYPE = [
-        ('Studio','Studio'),
-        ('F2','F2'),
-        ('F3','F3'),
-        ('F4','F4'),
-        ('F5','F5'),
-        ('F6','F6'),
-    ]
-    GROUND_TYPE = [
-        ('GoodSoil','GoodSoil'),
-        ('MediumSoil','MediumSoil'),
-        ('BadSoil','BadSoil'),
-    ]
-    TERRAIN_TYPE = [
-        ('Flat','Flat'),
-        ('Uneven','Uneven'),
-        ('Challenging','Challenging'),
-    ]
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
-    surface = models.FloatField()
-    numberFloors = models.IntegerField()
-    houseType = models.CharField(
-        max_length=100,
-        choices=HOUSE_TYPE,
-        default='F2'
-    )
-    groundType = models.CharField(
-        max_length=100,
-        choices=GROUND_TYPE,
-        default='MediumSoil'
-    )
-    terrainType = models.CharField(
-        max_length=100,
-        choices=TERRAIN_TYPE,
-        default='MediumSoil'
-    )
-    cost = models.FloatField()
-    time = models.FloatField()
+    wallConstructionSurface = models.FloatField(null=True)
+    wallDestructionSurface = models.FloatField(null=True)
+    cost = models.FloatField(null=True)
+    time = models.FloatField(null=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
 
 
     def save(self, *args, **kwargs):
-        # Load the AI model
-        model_path = os.path.join(settings.BASE_DIR, 'ml_models' , 'constructionHouse_model.pkl')
-        model = joblib.load(model_path)
+        # Constants
+        CONSTRUCTION_COST_PER_M2 = 11567  # DZD
+        DESTRUCTION_COST_PER_M2 = 159     # DZD
+        CONSTRUCTION_TIME_PER_M2 = 1      # hours
+        DESTRUCTION_TIME_PER_M2 = 0.2     # hours
 
-        # Prepare the input for prediction
-        input_data = pd.DataFrame([{
-            'surface': self.surface,
-            'numberFloors': self.numberFloors,
-            'houseType': self.houseType,
-            'groundType': self.groundType,
-            'terrainType': self.terrainType
-        }])
+        # Calculate total cost
+        self.cost = (
+            self.wallConstructionSurface * CONSTRUCTION_COST_PER_M2 +
+            self.wallDestructionSurface * DESTRUCTION_COST_PER_M2
+        )
 
+        # Calculate total time
+        self.time = (
+            self.wallConstructionSurface * CONSTRUCTION_TIME_PER_M2 +
+            self.wallDestructionSurface * DESTRUCTION_TIME_PER_M2
+        )
 
-        # Predict cost and time
-        prediction = model.predict(input_data)[0]
-        self.cost = round(prediction[0], 2)
-        self.time = round(prediction[1], 2)
-
-        # Save normally
         super().save(*args, **kwargs)
 
 
