@@ -23,6 +23,7 @@ class ClientConsumer(AsyncWebsocketConsumer):
 
         await self.channel_layer.group_add(self.room_name, self.channel_name)
         await self.accept()
+
         await self.send_history()
 
     async def disconnect(self, close_code):
@@ -30,28 +31,27 @@ class ClientConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        content = data['message']
+        message = data.get('message')
 
-        # Save the client's message
-        await self.save_message(self.user, None, content)
-
-        # Forward the message to the manager group
-        await self.channel_layer.group_send(
-            "manager_room",
-            {
-                'type': 'chat_message',
-                'message': content,
-                'sender': f"{self.user.firstName} {self.user.lastName}".strip() or self.user.email,
-                'room': self.room_name,
-            }
-        )
+        if message:
+            await self.save_message(self.user, None, message)
+            await self.channel_layer.group_send(
+                self.room_name,  # 👈 send to the same room
+                {
+                    'type': 'chat_message',
+                    'message': message,
+                    'sender': f"{self.user.firstName} {self.user.lastName}".strip() or self.user.email,
+                }
+            )
 
     async def chat_message(self, event):
-        if event.get('room') == self.room_name:
-            await self.send(text_data=json.dumps({
-                'message': event['message'],
-                'sender': event['sender'],
-            }))
+        await self.send(text_data=json.dumps({
+            'message': event['message'],
+            'sender': event['sender'],
+        }))
+
+    # rest unchanged
+
 
     async def send_history(self):
         messages = await sync_to_async(self.get_messages)()

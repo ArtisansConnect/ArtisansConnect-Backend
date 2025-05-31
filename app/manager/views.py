@@ -5,12 +5,20 @@ from core.serializers import (
     UpdateProjectStatusSerializer,
     ProjectPlanificationSerializer
 )
+from .serializers import (
+    TagSerializer,
+    BlogSerializer
+)
 from core.models import (
     Planification,
-    Project
+    Project,
+    Tags,
+    Blog
 )
 from rest_framework.response import Response
-from rest_framework import status,permissions
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from core.permissions import (IsManager)
 
 # The Manager can create a new planification
 class PlanificationView(APIView): 
@@ -84,3 +92,48 @@ class ManagerListProject(APIView):
         instance = Project.objects.all()
         serializer = ProjectPlanificationSerializer(instance,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+    
+
+# The manager can create new tags for its blog
+class TagView(APIView):
+    serializer_class = TagSerializer
+    permission_classes = [IsManager]    
+
+    def get(self,request):
+        instance = Tags.objects.all()
+        serializer = TagSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    
+    def post(self,request):
+        serializer = TagSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+# The manager can create a new blog 
+class BlogView(APIView):
+    serializer_class = BlogSerializer
+    permission_classes = [IsManager]    
+
+    def get(self,request):
+        instance = Blog.objects.all()
+        serializer = BlogSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    
+    def post(self,request):
+        serializer = BlogSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)    
+    
+# The manager can list a new blog 
+class BlogListView(APIView):
+    serializer_class = BlogSerializer
+    permission_classes = [AllowAny]    
+
+    def get(self,request):
+        instance = Blog.objects.all()
+        serializer = BlogSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)    

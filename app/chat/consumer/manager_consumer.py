@@ -10,7 +10,7 @@ from core.models import Message, CustomUser  # Adjust import paths as needed
 class ManagerConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = await self.get_user_from_token()
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]  # e.g., client_1
 
         if isinstance(self.user, AnonymousUser) or not self.user.is_staff:
             await self.close()
@@ -19,7 +19,7 @@ class ManagerConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_name, self.channel_name)
         await self.accept()
 
-        # Send all previous messages in the room
+        # Send chat history
         messages = await self.get_messages(self.room_name)
         for msg in messages:
             await self.send(text_data=json.dumps(msg))
@@ -33,7 +33,6 @@ class ManagerConsumer(AsyncWebsocketConsumer):
 
         if message:
             await self.save_message(self.room_name, self.user, message)
-
             await self.channel_layer.group_send(
                 self.room_name,
                 {
@@ -48,6 +47,7 @@ class ManagerConsumer(AsyncWebsocketConsumer):
             "message": event["message"],
             "sender": event["sender"],
         }))
+
 
     @database_sync_to_async
     def get_user_from_token(self):

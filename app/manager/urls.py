@@ -3,7 +3,10 @@ from .views import (
     PlanificationView,
     PlanificationListViewManager,
     RefuseProject,
-    ManagerListProject
+    ManagerListProject,
+    TagView,
+    BlogView,
+    BlogListView
 )
 
 urlpatterns = [
@@ -13,4 +16,7 @@ urlpatterns = [
     path('planification/<int:pk>/',PlanificationListViewManager.as_view(),name='planification-detail'),  # see only one planification using id
     path('planification/accept/', PlanificationView.as_view(),name='accept=project'),                    # accept project to create a new planification
     path('planification/reject/<int:pk>/', RefuseProject.as_view(),name='refuse-project'),                        # refuse project 
+    path('tags/',TagView.as_view(),name='tags-list'),
+    path('blog/',BlogListView.as_view(),name='blogs-list'),
+    path('blogs/create',BlogView.as_view(),name='blog')
 ]
