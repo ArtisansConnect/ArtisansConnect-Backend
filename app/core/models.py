@@ -906,3 +906,19 @@ class Message(models.Model):
     
     def __str__(self):
         return f"[{self.timestamp}] {self.sender}: {self.message}"
+
+class Tags(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return {self.name}
+
+class Blog(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)      
+    tags = models.ManyToManyField(Tags,null=True)  
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return super().__str__()
