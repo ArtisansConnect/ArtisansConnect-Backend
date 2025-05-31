@@ -67,4 +67,11 @@ class ProfileUserSerializer(ModelSerializer):
 class ProfilesUsersSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id','email','firstName','lastName']         
+        fields = ['id','email','firstName','lastName']  
+
+class RequestRecrutement(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id','email','firstName','lastName',
+                  'phoneNumber','location','roleArtisan',
+                  'diplomDocument']               

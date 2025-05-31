@@ -20,6 +20,24 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('Manager','Manager'),
         ('Admin','Admin')
     ]
+    ARTISAN_ROLE_TYPE = [
+        ('Construction','Construction'),
+        ('Electricity','Electricity'),
+        ('Painting','Painting'),
+        ('Flooring','Flooring'),
+        ('Hvac','Hvac'),
+        ('Plumbing','Plumbing'),
+        ('Carpentary','Carpentary'),
+        ('Roofing','Roofing'),
+        ('Tailing','Tailing'),
+    ]
+    LOCATION = [
+        ('Constantine','Constantine'),
+        ('Algier','Algier'),
+        ('Annaba','Annaba'),
+        ('Jijel','Jijel'),
+        ('Setif','Setif')
+    ]
     email = models.EmailField(_("email address"), unique=True)
     firstName = models.CharField(max_length=100)
     lastName = models.CharField(max_length=100)
@@ -33,6 +51,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
     image = models.ImageField(upload_to='profile_images/',blank=True,null=True)
+    location = models.CharField(
+        max_length=100,
+        choices=LOCATION,
+        default='Constantine',
+        null=True
+    )
+    # Artisan Options
+    roleArtisan = models.CharField(
+        max_length=100,
+        null=True,
+        choices= ARTISAN_ROLE_TYPE
+    )
+    diplomDocument = models.FileField(upload_to='artisan_documents/',null=True)
+    rating = models.FloatField(default=5.0,null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['firstName','lastName','phoneNumber','role']
