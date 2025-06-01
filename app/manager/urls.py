@@ -6,7 +6,9 @@ from .views import (
     ManagerListProject,
     TagView,
     BlogView,
-    BlogListView
+    BlogListView,
+    AcceptRecrutement,
+    RejectRecrutement
 )
 
 urlpatterns = [
@@ -18,5 +20,7 @@ urlpatterns = [
     path('planification/reject/<int:pk>/', RefuseProject.as_view(),name='refuse-project'),                        # refuse project 
     path('tags/',TagView.as_view(),name='tags-list'),
     path('blog/',BlogListView.as_view(),name='blogs-list'),
-    path('blogs/create',BlogView.as_view(),name='blog')
+    path('blogs/create',BlogView.as_view(),name='blog'),
+    path('hiring/accept/<int:pk>/',AcceptRecrutement.as_view(),name='accept-hiring'),
+    path('hiring/reject/<int:pk>/',RejectRecrutement.as_view(),name='accept-hiring')
 ]

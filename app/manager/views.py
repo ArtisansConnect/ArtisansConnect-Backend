@@ -3,18 +3,21 @@ from core.serializers import (
     PlanificationSerializer,
     PlanificationListSerializer,
     UpdateProjectStatusSerializer,
-    ProjectPlanificationSerializer
+    ProjectPlanificationSerializer,
 )
 from .serializers import (
     TagSerializer,
-    BlogSerializer
+    BlogSerializer,
+    AcceptRecrutementSerializer
 )
 from core.models import (
     Planification,
     Project,
     Tags,
-    Blog
+    Blog,
+    CustomUser
 )
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -137,3 +140,31 @@ class BlogListView(APIView):
         instance = Blog.objects.all()
         serializer = BlogSerializer(instance,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)    
+    
+
+# Artisan Side
+# The manager can accept the recrutement or reject it by updating is_active profile    
+class AcceptRecrutement(APIView):
+    serializer_class = AcceptRecrutementSerializer
+    permission_classes = [IsManager]
+
+    def patch(self,request,pk=None):
+        try:
+            user = get_object_or_404(CustomUser,pk=pk,role='Artisan')
+        except CustomUser.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)    
+        serializer = AcceptRecrutementSerializer(user,data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+class RejectRecrutement(APIView):    
+    permission_classes = [IsManager]  
+
+    def delete(self, request, pk=None):
+        # Find the artisan by ID and role
+        artisan = get_object_or_404(CustomUser, pk=pk, role='Artisan')
+        
+        artisan.delete()
+        return Response({"detail": "Recruitment rejected and user deleted."}, status=status.HTTP_204_NO_CONTENT)

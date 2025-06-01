@@ -1,4 +1,4 @@
-from core.models import Tags,Blog
+from core.models import Tags,Blog,CustomUser
 from rest_framework.serializers import ModelSerializer
 
 class TagSerializer(ModelSerializer):
@@ -11,3 +11,9 @@ class BlogSerializer(ModelSerializer):
         model = Blog
         fields = '__all__'       
         read_only_fields = ['user','date']
+
+# The Manager can Accept the recrutement of an inactive artisan
+class AcceptRecrutementSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['is_active']     
