@@ -16,4 +16,10 @@ class BlogSerializer(ModelSerializer):
 class AcceptRecrutementSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['is_active']     
+        fields = ['is_active']   
+
+# The Manager could see the list of artisans
+class ListArtisanSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email','phoneNumber','firstName','lastName','roleArtisan','location','is_active','date_joined','diplomDocument']

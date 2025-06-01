@@ -8,7 +8,8 @@ from core.serializers import (
 from .serializers import (
     TagSerializer,
     BlogSerializer,
-    AcceptRecrutementSerializer
+    AcceptRecrutementSerializer,
+    ListArtisanSerializer
 )
 from core.models import (
     Planification,
@@ -143,6 +144,7 @@ class BlogListView(APIView):
     
 
 # Artisan Side
+
 # The manager can accept the recrutement or reject it by updating is_active profile    
 class AcceptRecrutement(APIView):
     serializer_class = AcceptRecrutementSerializer
@@ -168,3 +170,14 @@ class RejectRecrutement(APIView):
         
         artisan.delete()
         return Response({"detail": "Recruitment rejected and user deleted."}, status=status.HTTP_204_NO_CONTENT)
+
+
+# The manager could see all the artisans
+class ArtisanList(APIView):
+    serializer_class = ListArtisanSerializer
+    permission_classes = [IsManager]
+
+    def get(self,request):
+        instance = CustomUser.objects.filter(role='Artisan')
+        serializer = ListArtisanSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
