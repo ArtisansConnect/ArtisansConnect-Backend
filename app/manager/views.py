@@ -100,6 +100,16 @@ class ManagerListProject(APIView):
 
 # General Side
 
+class TagViewGeneral(APIView):
+    serializer_class = TagSerializer
+    permission_classes = [AllowAny]    
+
+    def get(self,request):
+        instance = Tags.objects.all()
+        serializer = TagSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+
 # The manager can create new tags for its blog
 class TagView(APIView):
     serializer_class = TagSerializer
