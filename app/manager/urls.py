@@ -9,7 +9,8 @@ from .views import (
     BlogListView,
     AcceptRecrutement,
     RejectRecrutement,
-    ArtisanList
+    ArtisanList,
+    UpdateBlog
 )
 
 urlpatterns = [
@@ -24,6 +25,7 @@ urlpatterns = [
     path('tags/',TagView.as_view(),name='tags-list'),
     path('blogs/',BlogListView.as_view(),name='blogs-list'),
     path('blogs/create/',BlogView.as_view(),name='blog'),
+    path('blogs/update/',UpdateBlog.as_view(),name='update-blog'),
     # Artisan Side
     path('hiring/accept/<int:pk>/',AcceptRecrutement.as_view(),name='accept-hiring'),                   # accept recrutement
     path('hiring/reject/<int:pk>/',RejectRecrutement.as_view(),name='accept-hiring'),                   # reject recrutement
