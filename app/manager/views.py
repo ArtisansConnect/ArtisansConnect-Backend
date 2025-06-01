@@ -98,6 +98,18 @@ class ManagerListProject(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
     
 
+# General Side
+
+class TagViewGeneral(APIView):
+    serializer_class = TagSerializer
+    permission_classes = [AllowAny]    
+
+    def get(self,request):
+        instance = Tags.objects.all()
+        serializer = TagSerializer(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+
 # The manager can create new tags for its blog
 class TagView(APIView):
     serializer_class = TagSerializer
@@ -141,6 +153,22 @@ class BlogListView(APIView):
         instance = Blog.objects.all()
         serializer = BlogSerializer(instance,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)    
+
+ # The manager could update the blog   
+class UpdateBlog(APIView):
+    serializer_class = BlogSerializer
+    permission_classes = [IsManager]
+
+    def patch(self,request,pk=None):
+        try:
+            instance = Blog.objects.get(pk=pk)
+        except Blog.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = BlogSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
     
 
 # Artisan Side
