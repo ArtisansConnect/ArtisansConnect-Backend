@@ -29,7 +29,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('Plumbing','Plumbing'),
         ('Carpentary','Carpentary'),
         ('Roofing','Roofing'),
-        ('Tailing','Tailing'),
+        ('Facade','Facade'),
     ]
     LOCATION = [
         ('Constantine','Constantine'),
@@ -93,7 +93,7 @@ class ElectricalService(models.Model):
         choices=STATUS_CHOICES
     )
     rank = models.PositiveIntegerField(default=0,null=True)
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)  
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='electrical_services_requested')  
 
     PANEL_CHOICES = [
         ('BIG','Big'),
@@ -150,6 +150,10 @@ class ElectricalService(models.Model):
     time = models.FloatField(null=True, editable=False)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True,
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Electricity'},
+                                related_name='electrical_services_assigned')
 
 
     def save(self, *args, **kwargs):
@@ -205,10 +209,10 @@ class PaintingService(models.Model):
     status = models.CharField(
         max_length=100,
         default='NonSelected',
-        choices=STATUS_CHOICES
+        choices=STATUS_CHOICES,
     )
     rank = models.PositiveIntegerField(default=0,null=True)
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)  
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='painting_services_requested')  
     PAINTING_TYPE = [
         ('BASIC','Basic'),
         ('COLORED','Colored'),
@@ -227,6 +231,10 @@ class PaintingService(models.Model):
     time = models.FloatField(null=True, blank=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True, 
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Painting'},
+                                related_name='painting_services_assigned')
 
 
     def save(self, *args, **kwargs):
@@ -260,7 +268,7 @@ class FlooringService(models.Model):
         choices=STATUS_CHOICES
     )
     rank = models.PositiveIntegerField(default=0,null=True)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='flooring_services_requested')
 
     FLOORTYPE = [
         ('CARRELAGE', 'Carrelage'),
@@ -277,6 +285,10 @@ class FlooringService(models.Model):
     time = models.FloatField(editable=False,null=True,blank=True)  # in hours
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True, 
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Flooring'},
+                                related_name='flooring_services_assigned')
 
 
     def save(self, *args, **kwargs):
@@ -306,7 +318,7 @@ class HvacService(models.Model):
         choices=STATUS_CHOICES
     )
     rank = models.PositiveIntegerField(default=0,null=True)
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)        
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='hvac_services_requested')        
     smallHvac = models.IntegerField()
     mediumHvac = models.IntegerField()
     bigHvac = models.IntegerField()
@@ -314,6 +326,10 @@ class HvacService(models.Model):
     time = models.FloatField(editable=False,null=True,blank=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True, 
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Hvac'},
+                                related_name='hvac_services_assigned')
 
 
     def save(self, *args, **kwargs):
@@ -352,7 +368,7 @@ class PlumbingService(models.Model):
         ('Helyos_Evo', 'Helyos Evo'),
         ('Primavera_H500', 'Primavera H500')
     ]
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE) 
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='plumbing_services_requested') 
 
     # Central elements       
     boilerSize = models.CharField(
@@ -470,6 +486,10 @@ class PlumbingService(models.Model):
     time = models.FloatField()
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True, 
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Plumbing'},
+                                related_name='plumbing_services_assigned')
 
 
     def load_model(self):
@@ -567,7 +587,7 @@ class WindowsDoorsService(models.Model):
         ('StandardWood','StandardWood'),
         ('HighEndWood','HighEndWood'),
     ]
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='carpentary_services_requested')
     windows = models.IntegerField(validators=[validate_window])
     windowsTypes = models.CharField(
         max_length=100,
@@ -584,6 +604,10 @@ class WindowsDoorsService(models.Model):
     cost = models.FloatField(null=True, blank=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True, 
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Carpentary'},
+                                related_name='carpentary_services_assigned')
 
 
     def load_model(self):
@@ -656,7 +680,7 @@ class RoofingService(models.Model):
         ('RomanTiles','Roman tiles with waterproofing'),
         ('SlateRoof','Slate roof')
     ]
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='roofing_services_requested')
     surface = models.FloatField(validators=[validate_roof_surface])      
     roofType = models.CharField(
         max_length=100,
@@ -667,6 +691,10 @@ class RoofingService(models.Model):
     cost = models.FloatField(null=True, blank=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True, 
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Roofing'},
+                                related_name='roofing_services_assigned')
 
 
     def load_model(self):
@@ -698,13 +726,17 @@ class ConstructionHouseService(models.Model):
         choices=STATUS_CHOICES
     )
     rank = models.PositiveIntegerField(default=0,null=True)
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='construction_services_requested')
     wallConstructionSurface = models.FloatField(null=True)
     wallDestructionSurface = models.FloatField(null=True)
     cost = models.FloatField(null=True)
     time = models.FloatField(null=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True, 
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Construction'},
+                                related_name='construction_services_assigned')
 
 
     def save(self, *args, **kwargs):
@@ -744,7 +776,7 @@ class FacadeService(models.Model):
         ('Ventilated Facade(Terracotta)', 'Ventilated Facade(Terracotta)'),
     ]
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='facade_services_requested')
     surface = models.FloatField()
     finishing_layer = models.CharField(
         max_length=100,
@@ -757,6 +789,10 @@ class FacadeService(models.Model):
     time = models.FloatField(blank=True, null=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
+                                null=True, blank=True, 
+                                limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Facade'},
+                                related_name='facade_services_assigned')
 
     def save(self, *args, **kwargs):
         try:
