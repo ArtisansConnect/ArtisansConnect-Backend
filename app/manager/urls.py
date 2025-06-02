@@ -11,7 +11,8 @@ from .views import (
     RejectRecrutement,
     ArtisanList,
     UpdateBlog,
-    TagViewGeneral
+    TagViewGeneral,
+    ProjectArtisanAffectAPIView
 )
 
 urlpatterns = [
@@ -32,4 +33,5 @@ urlpatterns = [
     path('hiring/accept/<int:pk>/',AcceptRecrutement.as_view(),name='accept-hiring'),                   # accept recrutement
     path('hiring/reject/<int:pk>/',RejectRecrutement.as_view(),name='accept-hiring'),                   # reject recrutement
     path('artisans/list/',ArtisanList.as_view(),name='artisan-list'),                                   # see all the artisans
+    path('artisans/affect/<int:pk>/', ProjectArtisanAffectAPIView.as_view(), name='assign-artisans')
 ]

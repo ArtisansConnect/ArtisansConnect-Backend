@@ -96,7 +96,7 @@ class FlooringProjectSerializer(serializers.ModelSerializer):
 
 class PlumbingProjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PaintingService
+        model = PlumbingService
         fields = ['id','time','cost','start_date','end_date','rank']
 
 class CarpentaryProjectSerializer(serializers.ModelSerializer):

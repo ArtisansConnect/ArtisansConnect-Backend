@@ -20,5 +20,5 @@ class RequestRecrutementSerializer(ModelSerializer):
 class UpdateArtisanProfileSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['email','firstname','lastname',
+        fields = ['email','firstName','lastName',
                   'phoneNumber','image','location']        
