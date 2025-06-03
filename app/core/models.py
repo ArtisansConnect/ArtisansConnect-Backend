@@ -85,6 +85,19 @@ STATUS_CHOICES = [
     ('NonSelected','NonSelected')
 ]
 
+class ProgressChoices(models.IntegerChoices):
+    NOT_STARTED = 0, '0%'
+    TEN = 10, '10%'
+    TWENTY = 20, '20%'
+    THIRTY = 30, '30%'
+    FORTY = 40, '40%'
+    FIFTY = 50, '50%'
+    SIXTY = 60, '60%'
+    SEVENTY = 70, '70%'
+    EIGHTY = 80, '80%'
+    NINETY = 90, '90%'
+    HUNDRED = 100, '100%'
+
 
 class ElectricalService(models.Model):
     status = models.CharField(
@@ -150,6 +163,11 @@ class ElectricalService(models.Model):
     time = models.FloatField(null=True, editable=False)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True,
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Electricity'},
@@ -231,6 +249,11 @@ class PaintingService(models.Model):
     time = models.FloatField(null=True, blank=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True, 
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Painting'},
@@ -285,6 +308,11 @@ class FlooringService(models.Model):
     time = models.FloatField(editable=False,null=True,blank=True)  # in hours
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True, 
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Flooring'},
@@ -326,6 +354,11 @@ class HvacService(models.Model):
     time = models.FloatField(editable=False,null=True,blank=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True, 
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Hvac'},
@@ -486,6 +519,11 @@ class PlumbingService(models.Model):
     time = models.FloatField()
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True, 
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Plumbing'},
@@ -604,6 +642,11 @@ class WindowsDoorsService(models.Model):
     cost = models.FloatField(null=True, blank=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True, 
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Carpentary'},
@@ -691,6 +734,11 @@ class RoofingService(models.Model):
     cost = models.FloatField(null=True, blank=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True, 
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Roofing'},
@@ -733,6 +781,11 @@ class ConstructionHouseService(models.Model):
     time = models.FloatField(null=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True, 
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Construction'},
@@ -789,6 +842,11 @@ class FacadeService(models.Model):
     time = models.FloatField(blank=True, null=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    progress = models.IntegerField(
+        choices=ProgressChoices.choices,
+        default=ProgressChoices.NOT_STARTED,
+        null=True
+    )
     artisan = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, 
                                 null=True, blank=True, 
                                 limit_choices_to={'role': 'Artisan', 'roleArtisan': 'Facade'},

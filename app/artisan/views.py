@@ -3,7 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from .serializers import (
     RequestRecrutementSerializer,
-    UpdateArtisanProfileSerializer
+    UpdateArtisanProfileSerializer,
+    ElectricalTasksArtisan
 )
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,7 +12,8 @@ from core.permissions import (
     IsArtisan
 )
 from core.models import (
-    CustomUser
+    CustomUser,
+    ElectricalService
 )
 from django.shortcuts import get_object_or_404
 
@@ -41,3 +43,17 @@ class UpdateArtisanProfile(APIView):
             serializer.save()
             return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+
+# Each Artisan can see their tasks after authenticate
+class ListElectricalTasks(APIView):
+    serializer_class =  ElectricalTasksArtisan
+    permission_classes = [IsArtisan]    
+
+    def get(self,request):
+        instance = ElectricalService.objects.filter(artisan=request.user)
+        serializer = ElectricalTasksArtisan(instance,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    
+class UpdateElectricalProgress(APIView):
+    serializer_class = ElectricalService  
