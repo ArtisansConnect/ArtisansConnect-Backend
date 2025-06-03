@@ -9,7 +9,8 @@ from .serializers import (
     TagSerializer,
     BlogSerializer,
     AcceptRecrutementSerializer,
-    ListArtisanSerializer
+    ListArtisanSerializer,
+    AffectServiceArtisanSerializer
 )
 from core.models import (
     Planification,
@@ -209,3 +210,35 @@ class ArtisanList(APIView):
         instance = CustomUser.objects.filter(role='Artisan')
         serializer = ListArtisanSerializer(instance,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+    
+# The manager could affect a service task to an artisan by updating the artisan fields 
+class ProjectArtisanAffectAPIView(APIView):
+    serializer_class = AffectServiceArtisanSerializer
+    permission_classes = [IsManager]
+
+    def patch(self, request, pk, format=None):
+        user = request.user
+        if user.role != 'Manager':
+            return Response(
+                {"detail": "Only managers can assign artisans."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            project = Project.objects.get(pk=pk)
+        except Project.DoesNotExist:
+            return Response(
+                {"detail": "Project not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = AffectServiceArtisanSerializer(
+            project,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

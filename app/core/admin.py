@@ -11,7 +11,10 @@ from .models import (CustomUser,
                      RoofingService,
                      WindowsDoorsService,
                      Project,
-                     Planification)
+                     Planification,
+                     Message,
+                     Tags,
+                     Blog)
 
 admin.site.register(ElectricalService)
 admin.site.register(PaintingService)
@@ -24,6 +27,9 @@ admin.site.register(RoofingService)
 admin.site.register(WindowsDoorsService)
 admin.site.register(Project)
 admin.site.register(Planification)
+admin.site.register(Message)
+admin.site.register(Tags)
+admin.site.register(Blog)
 
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('email', 'firstName', 'lastName', 'role', 'image_tag')
