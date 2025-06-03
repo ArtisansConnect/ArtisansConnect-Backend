@@ -22,4 +22,4 @@ class AcceptRecrutementSerializer(ModelSerializer):
 class ListArtisanSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['email','phoneNumber','firstName','lastName','roleArtisan','location','is_active','date_joined','diplomDocument']
+        fields = ['id','email','phoneNumber','firstName','lastName','roleArtisan','location','is_active','date_joined','diplomDocument']
