@@ -22,6 +22,9 @@ class AcceptRecrutementSerializer(ModelSerializer):
 class ListArtisanSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
+<<<<<<< HEAD
+        fields = ['id','email','phoneNumber','firstName','lastName','roleArtisan','location','is_active','date_joined','diplomDocument']
+=======
         fields = ['id','email','phoneNumber','firstName','lastName','roleArtisan','location','is_active','date_joined','diplomDocument']
 
 
@@ -144,3 +147,4 @@ class AffectServiceArtisanSerializer(serializers.ModelSerializer):
             start_date__lt=current_service.end_date,
             end_date__gt=current_service.start_date
         ).exclude(id=current_service.id).exists()
+>>>>>>> a23c7b6687d8d8c0c828b693c6210eeeb56a21dc
