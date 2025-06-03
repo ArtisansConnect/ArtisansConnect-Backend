@@ -6,10 +6,11 @@ from .serializers import (
     CustomTokenObtainPairSerializer,
     UpdateUserSerializer,
     ProfileUserSerializer,
-    ProfilesUsersSerializer
+    ProfilesUsersSerializer,
+    ProfileArtisanSerializer
     )
 from rest_framework_simplejwt.views import TokenObtainPairView
-from core.permissions import IsManager
+from core.permissions import IsManager,IsArtisan
 
 class Signup(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -39,3 +40,10 @@ class ListUsers(generics.ListAPIView):
 
     def get_queryset(self):
         return CustomUser.objects.all() 
+    
+class ViewArtisan(generics.RetrieveAPIView):  
+    serializer_class = ProfileArtisanSerializer
+    permission_classes = [IsArtisan]  
+
+    def get_object(self):
+        return self.request.user

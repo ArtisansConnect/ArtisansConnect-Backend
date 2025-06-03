@@ -4,7 +4,8 @@ from rest_framework.permissions import AllowAny
 from .serializers import (
     RequestRecrutementSerializer,
     UpdateArtisanProfileSerializer,
-    ElectricalTasksArtisan
+    ElectricalTasksArtisan,
+    ElectricalUpdateProgressSerializer
 )
 from rest_framework.response import Response
 from rest_framework import status
@@ -56,4 +57,16 @@ class ListElectricalTasks(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
     
 class UpdateElectricalProgress(APIView):
-    serializer_class = ElectricalService  
+    serializer_class = ElectricalUpdateProgressSerializer  
+    permission_classes = [IsArtisan]
+
+    def patch(self,request,pk=None):
+        try:
+            instance = ElectricalService.objects.filter(pk=pk,artisan=request.user)
+        except ElectricalService.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer =  ElectricalUpdateProgressSerializer(instance,data=request.data,partial=True)   
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)

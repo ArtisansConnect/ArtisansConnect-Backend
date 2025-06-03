@@ -64,6 +64,11 @@ class ProfileUserSerializer(ModelSerializer):
         model = CustomUser
         fields = ['email','firstName','lastName','image'] 
 
+class ProfileArtisanSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email','firstName','lastName','image','phoneNumber','location','diplomDocument']        
+
 class ProfilesUsersSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
