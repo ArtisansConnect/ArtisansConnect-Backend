@@ -5,8 +5,8 @@ services:
     image: postgres:14
     environment:
       POSTGRES_DB: mydb
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: wail
+      POSTGRES_PASSWORD: W&88$i&01lo
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -25,8 +25,8 @@ services:
     environment:
       - DEBUG=1
       - DB_NAME=mydb
-      - DB_USER=user
-      - DB_PASSWORD=pass
+      - DB_USER=wail
+      - DB_PASSWORD=W&88$i&01lo
       - DB_HOST=db
       - DJANGO_SETTINGS_MODULE=app.settings
     depends_on:

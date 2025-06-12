@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-k^p8ss&mry20x2o-i9^=op1x73sgqxgr#ezdmpt4l$p85jg1di
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['18.184.75.138', 'localhost', '127.0.0.1','0.0.0.0']
 
 
 # Application definition
@@ -152,6 +152,16 @@ CHANNEL_LAYERS = {
             "hosts": [('redis', 6379)],
         },
     },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{os.environ.get('REDIS_HOST')}:{os.environ.get('REDIS_PORT', 6379)}/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
 }
 
 
