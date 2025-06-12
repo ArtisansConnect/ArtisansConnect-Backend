@@ -24,10 +24,10 @@ services:
       - .:/app
     environment:
       - DEBUG=1
-      - DB_NAME= mydb
-      - DB_USER= wail
-      - DB_PASSWORD= W&88$i&01lo
-      - DB_HOST= db
+      - DB_NAME=mydb
+      - DB_USER=wail
+      - DB_PASSWORD=W&88$i&01lo
+      - DB_HOST=db
       - DJANGO_SETTINGS_MODULE=app.settings
     depends_on:
       - db
